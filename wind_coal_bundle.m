@@ -75,15 +75,17 @@ set(legend, 'location', 'northwest');
 
 
 %% two coal units
-x_coal_unit1 = linspace(0.4,1,10) * coal_nameplate;
-x_coal_unit2 = linspace(0.4,1,11) * coal_nameplate;
-p_coal_unit1 = (linspace(0.4,1,10)-0.08) * coal_nameplate;
-p_coal_unit2 = (linspace(0.4,1,11)-0.08) * coal_nameplate;
+dx1 = 50;
+dx2 = 51;
+x_coal_unit1 = linspace(0.4,1,dx1) * coal_nameplate;
+x_coal_unit2 = linspace(0.4,1,dx2) * coal_nameplate;
+p_coal_unit1 = (linspace(0.4,1,dx1)-0.08) * coal_nameplate;
+p_coal_unit2 = (linspace(0.4,1,dx2)-0.08) * coal_nameplate;
 [c1,c2] = meshgrid(p_coal_unit1,p_coal_unit2);
 p_coal = c1 + c2;
 
-f_coal_unit1 = 266*linspace(0.4,1,10).^2 -507*linspace(0.4,1,10) + 542; %[g/kWh]
-f_coal_unit2 = 266*linspace(0.4,1,11).^2 -507*linspace(0.4,1,11) + 542; %[g/kWh]
+f_coal_unit1 = 266*linspace(0.4,1,dx1).^2 -507*linspace(0.4,1,dx1) + 542; %[g/kWh]
+f_coal_unit2 = 266*linspace(0.4,1,dx2).^2 -507*linspace(0.4,1,dx2) + 542; %[g/kWh]
 [f1,f2] = meshgrid(f_coal_unit1,f_coal_unit2);
 f_coal = f1 + f2;
 
@@ -95,12 +97,14 @@ ylabel('u1 (10 grids)');
 figure(4); clf;
 mesh(x_coal_unit1, x_coal_unit2, f_coal); hold on;
 surface(x_coal_unit1, x_coal_unit2, ones(size(f_coal))*680, 'facec', [0 1 0], 'edgecolor', [0 0.8 0]);
+alpha(0.8);
 xlabel('u2 (11 grids)');
 ylabel('u1 (10 grids)');
 
-p_range = [600, 800, 1000];
+p_range = 450:50:1200;
 opt_u1 = -1*ones(1,length(p_range));
 opt_u2 = -1*ones(1,length(p_range));
+opt_f = -1*ones(1,length(p_range));
 for i = 1:length(p_range)
 p_level = p_range(i);
 isoquant1p = linspace(min(x_coal_unit1),max(x_coal_unit1),50);
@@ -121,14 +125,25 @@ if any(~out_of_bnd)
     [value,id] = min(isoquant3f);
     opt_u1(i) = isoquant1p(id);
     opt_u2(i) = isoquant2p(id);
+    opt_f(i) = value;
     
-    figure(3); hold on;
-    plot3(isoquant1p, isoquant2p, isoquant3p, 'linewidth', 2);
-    figure(4); hold on;
-    plot3(isoquant1f, isoquant2f, isoquant3f, 'linewidth', 2);
+%     figure(3); hold on;
+%     plot3(isoquant1p, isoquant2p, isoquant3p, 'linewidth', 2);
+%     figure(4); hold on;
+%     plot3(isoquant1f, isoquant2f, isoquant3f, 'linewidth', 2);
 end
 
 end
+% figure(3); hold on;
+% plot3(opt_u1, opt_u2, isoquant3p, 'linewidth', 2);
+
+exclud_id = find(opt_f==-1);
+p_range(exclud_id) = [];
+opt_u1(exclud_id) = [];
+opt_u2(exclud_id) = [];
+opt_f(exclud_id) = [];
+figure(4); hold on;
+plot3(opt_u1, opt_u2, opt_f, 'linewidth', 2);
 
 
 %%
