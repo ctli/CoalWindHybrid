@@ -3,36 +3,12 @@ clear
 close all
 clc
 
-p_HVDC = 9000; % [MW] line capacity of HVDC line: 9GW
-
-yr_range = 1979:2009;
-
-subregion_name = 'Xilingol';
-lat = 43.9;
-lon = 116;
-color_code = [0 114 189]/255; % blue
-wst_yr = 8;
-bst_yr = 9;
-
-v_cutin = 3; % [m/s]
-v_cutout = 25; % [m/s]
-pwr_curve = [
-3	0.005993333
-4	0.041946667
-5	0.107866667
-6	0.203746667
-7	0.329586667
-8	0.503373333
-9	0.713106667
-10	0.92884
-10.61	1
-];
-
 %% supercritical air cooling
 coal_nameplate = 660; % [MW]
-coal_ramping = 0.01*coal_nameplate*60; % 396 MW/hr; (ramping: 1 precent/min)
-coal_num = 2;
 
+plot_switch = 'off'; % on/off
+switch plot_switch
+    case 'on'
 coal_fuelrate_x = 0.4:0.01:1; % [normalized]
 coal_fuelrate_y = 266*coal_fuelrate_x.^2 -507*coal_fuelrate_x + 542; %[g/kWh]
 coal_fuel_x  = coal_fuelrate_x*coal_nameplate; % [MW]
@@ -115,106 +91,223 @@ x_ticklabel = 0:0.15:1.5;
 set(ax2, 'xaxislocation', 'top', 'xlim', x_lim, 'xtick', x_ticklabel*coal_nameplate, 'xticklabel', x_ticklabel);
 set(ax2, 'yaxislocation', 'right', 'ylim', y_lim, 'ytick', y_tick, 'yticklabel', []);
 xlabel('Output Power (Normalized)', 'fontsize', 9);
+    case 'off'
+        ;
+end
 
 
 %% two coal units
+% dx1 = 1000;
+% dx2 = 1001;
 dx1 = 1000;
 dx2 = 1001;
-x_coal_unit1 = linspace(0.4,1,dx1) * coal_nameplate;
-x_coal_unit2 = linspace(0.4,1,dx2) * coal_nameplate;
-f_coal_unit1 = 266*linspace(0.4,1,dx1).^2 -507*linspace(0.4,1,dx1) + 542; %[g/kWh]
-f_coal_unit2 = 266*linspace(0.4,1,dx2).^2 -507*linspace(0.4,1,dx2) + 542; %[g/kWh]
+u_coal_unit1 = linspace(0.4,1,dx1) * coal_nameplate;
+u_coal_unit2 = linspace(0.4,1,dx2) * coal_nameplate;
+f_coal_unit1 = (266*linspace(0.4,1,dx1).^2 -507*linspace(0.4,1,dx1) + 542).*linspace(0.4,1,dx1)*coal_nameplate/1e3; %[g/kWh]
+f_coal_unit2 = (266*linspace(0.4,1,dx2).^2 -507*linspace(0.4,1,dx2) + 542).*linspace(0.4,1,dx2)*coal_nameplate/1e3; %[g/kWh]
 [f1,f2] = meshgrid(f_coal_unit1,f_coal_unit2);
 f_coal = f1 + f2;
 
 tic;
-p_range = 450:50:1200;
-opt_u1 = -1*ones(1,length(p_range));
-opt_u2 = -1*ones(1,length(p_range));
-opt_f = -1*ones(1,length(p_range));
-for i = 1:length(p_range)
-    p_level = p_range(i);
-    u1 = linspace(min(x_coal_unit1),max(x_coal_unit1),1000);
-    u1_out = u1 - 0.08*coal_nameplate;
-    u2_out = p_level - u1_out;
-    u2 = u2_out + 0.08*coal_nameplate;
-    f = interp2(x_coal_unit1, x_coal_unit2, f_coal, u1, u2);
+uu_range = (0.4*coal_nameplate*2):1:(coal_nameplate*2);
+vv_range = uu_range - 0.08*coal_nameplate*2;
+opt_u1 = -1*ones(1,length(uu_range));
+opt_u2 = -1*ones(1,length(uu_range));
+opt_f = -1*ones(1,length(uu_range));
+flag = -1*ones(1,length(uu_range)); % 1: pass; -1: fail
+for i = 1:length(uu_range)
+    q = vv_range(i);
+    u1 = linspace(min(u_coal_unit1),max(u_coal_unit1),2000);
+    v1 = u1 - 0.08*coal_nameplate;
+    v2 = q - v1;
+    u2 = v2 + 0.08*coal_nameplate;
+    f = interp2(u_coal_unit1, u_coal_unit2, f_coal, u1, u2);
     if any(~isnan(f))
         [value,id] = min(f);
         opt_u1(i) = u1(id);
         opt_u2(i) = u2(id);
         opt_f(i) = value;
+        flag(i) = 1;
     end
 end
-exclud_id = find(opt_f==-1);
-p_range(exclud_id) = [];
+exclud_id = find(flag==-1);
+uu_range(exclud_id) = [];
+vv_range(exclud_id) = [];
 opt_u1(exclud_id) = [];
 opt_u2(exclud_id) = [];
 opt_f(exclud_id) = [];
 toc;
 
-%% ========================
-dx1 = 20; % very course grid for plotting
-dx2 = 21;
-x_coal_unit1 = linspace(0.4,1,dx1) * coal_nameplate;
-x_coal_unit2 = linspace(0.4,1,dx2) * coal_nameplate;
-p_coal_unit1 = (linspace(0.4,1,dx1)-0.08) * coal_nameplate;
-p_coal_unit2 = (linspace(0.4,1,dx2)-0.08) * coal_nameplate;
-[c1,c2] = meshgrid(p_coal_unit1,p_coal_unit2);
-p_coal = c1 + c2;
-f_coal_unit1 = 266*linspace(0.4,1,dx1).^2 -507*linspace(0.4,1,dx1) + 542; %[g/kWh]
-f_coal_unit2 = 266*linspace(0.4,1,dx2).^2 -507*linspace(0.4,1,dx2) + 542; %[g/kWh]
+%% ========================================================================
+plot_switch = 'off'; % on/off
+switch plot_switch
+    case 'on' % don't plot
+dx1 = 10; % very course grid for plotting
+dx2 = 15;
+u_coal_unit1 = linspace(0.4,1,dx1) * coal_nameplate;
+u_coal_unit2 = linspace(0.4,1,dx2) * coal_nameplate;
+[p1,p2] = meshgrid(u_coal_unit1,u_coal_unit2);
+p_coal = p1 + p2;
+f_coal_unit1 = (266*linspace(0.4,1,dx1).^2 -507*linspace(0.4,1,dx1) + 542).*(linspace(0.4,1,dx1)*coal_nameplate/1e3); %[g/kWh]
+f_coal_unit2 = (266*linspace(0.4,1,dx2).^2 -507*linspace(0.4,1,dx2) + 542).*(linspace(0.4,1,dx2)*coal_nameplate/1e3); %[g/kWh]
 [f1,f2] = meshgrid(f_coal_unit1,f_coal_unit2);
 f_coal = f1 + f2;
 
+% ==============================
 figure(3); clf;
-mesh(x_coal_unit1, x_coal_unit2, p_coal); hold on;
-plot3(opt_u2, opt_u1, p_range, 'o-', 'linewidth', 1);
-xlabel('u2 (MW)');
-ylabel('u1 (MW)');
+mesh(u_coal_unit1, u_coal_unit2, p_coal); hold on;
+plot3(opt_u1, opt_u2, uu_range, 'o-', 'linewidth', 1, 'markersize', 4);
+xlabel('u1 (MW)');
+ylabel('u2 (MW)');
 zlabel('Combined Power Output (MW)');
 view(315, 35);
+set(gcf, 'unit', 'inch', 'pos', [1.0    5.85    5.0000    3.7500]);
+
+% ==============================
+figure(31); clf;
+mesh(u_coal_unit1, u_coal_unit2, p_coal); hold on;
+plot3(opt_u1, opt_u2, uu_range, 'o-', 'linewidth', 1, 'markersize', 4);
+xlabel('u1 (MW)');
+ylabel('u2 (MW)');
+zlabel('Combined Power Output (MW)');
+axis equal
+xlim([250 680])
+ylim([250 680])
+view(0, 90);
+set(gcf, 'unit', 'inch', 'pos', [1.0    1.09    5.0000    3.7500]);
+
+% ==============================
+figure(4); clf;
+mesh(u_coal_unit1, u_coal_unit2, f_coal); hold on;
+surface([0.4 1]*coal_nameplate, [0.4 1]*coal_nameplate, ones(2,2)*299.4, 'facec', [1 0.5 0.5], 'edgecolor', 'none');
+plot3([0.44 1]*coal_nameplate, [1 0.44]*coal_nameplate, ones(1,2)*299.4, 'color', 'k')
+alpha(0.7);
+xlabel('u1 (MW)');
+ylabel('u2 (MW)');
+zlabel('Combined Fuel Consumption (ton/h)');
+% view(315, 45);
+view(-110, 25);
 set(gcf, 'unit', 'inch', 'pos', [6.2    5.85    5.0000    3.7500]);
 
-figure(31); clf;
-mesh(x_coal_unit1, x_coal_unit2, p_coal); hold on;
-plot3(opt_u2, opt_u1, p_range, 'o-', 'linewidth', 1);
-xlabel('u2 (MW)');
-ylabel('u1 (MW)');
-zlabel('Combined Power Output (MW)');
+figure(41); clf;
+mesh(u_coal_unit1, u_coal_unit2, f_coal); hold on;
+surface([0.4 1]*coal_nameplate, [0.4 1]*coal_nameplate, ones(2,2)*299.4, 'facec', [1 0.5 0.5], 'edgecolor', 'none');
+plot3([0.44 1]*coal_nameplate, [1 0.44]*coal_nameplate, ones(1,2)*400, 'color', 'k', 'linewidth', 1)
+alpha(0.7);
+xlabel('u1 (MW)');
+ylabel('u2 (MW)');
+zlabel('Combined Fuel Consumption (ton/h)');
 axis equal
 xlim([250 680])
 ylim([250 680])
 view(0, 90);
 set(gcf, 'units', 'inch', 'pos', [6.25  1.0900   5   3.75]);
 
-figure(4); clf;
-mesh(x_coal_unit1, x_coal_unit2, f_coal); hold on;
-surface([0.4 1]*coal_nameplate, [0.4 1]*coal_nameplate, ones(2,2)*680, 'facec', [1 0.5 0.5], 'edgecolor', 'none');
-alpha(0.7);
-xlabel('u2 (MW)');
-ylabel('u1 (MW)');
+figure(42); clf;
+mesh(u_coal_unit1, u_coal_unit2, f_coal); hold on;
+plot3(opt_u1, opt_u2, opt_f, 'o-', 'linewidth', 1, 'markersize', 4);
+alpha(0.8);
+xlabel('u1 (MW)');
+ylabel('u2 (MW)');
 zlabel('Combined Fuel Consumption (ton/h)');
-view(315+180, 35);
+view(315, 15);
 set(gcf, 'unit', 'inch', 'pos', [11.4    5.85    5.0000    3.7500]);
 
-figure(41); clf;
-mesh(x_coal_unit1, x_coal_unit2, f_coal); hold on;
-plot3(opt_u1, opt_u2, opt_f, 'linewidth', 2);
-xlabel('u2 (MW)');
-ylabel('u1 (MW)');
-zlabel('Combined Fuel Consumption (ton/h)');
-view(115, 25);
-set(gcf, 'unit', 'inch', 'pos', [11.4    1.0900    5.0000    3.7500]);
-
-% ==================
+% ==============================
 figure(5); clf; hold on; box on;
 plot([200 800], [200 800], '-', 'color', [0.7 0.7 0.7]);
 plot(opt_u1, opt_u2, 'o-', 'markersize', 3);
 xlabel('Optimal u1');
 ylabel('Optimal u2');
-set(gcf, 'unit', 'inch', 'pos', [8.6979    3.5625    5.0000    3.7500]);
+set(gcf, 'unit', 'inch', 'pos', [11.4    1.0900    5.0000    3.7500]);
 axis equal;
 axis([200 800 200 800]);
 my_gridline;
+    otherwise % don't plot
+        ;
+end
+
+
+%% ========================================================================
+% one unit vs. two units
+p0 = 0;
+q0 = 0;
+f0 = 0;
+
+p1 = u_coal_unit1;
+q1 = p1 - 0.08*coal_nameplate;
+f1 = f_coal_unit1;
+
+p2 = uu_range;
+q2 = vv_range;
+f2 = opt_f;
+
+% ========
+q = 0:1:vv_range(end);
+f = zeros(1,length(q));
+u1_log = zeros(1, length(q));
+u2_log = zeros(1, length(q));
+f_u1 = zeros(1, length(q));
+f_u2 = zeros(1, length(q));
+
+id1 = (q>0 & q<=q1(end));
+f(id1) = interp1(q1, f1, q(id1));
+u1_log(id1) = interp1(q1, p1, q(id1));
+f_u1(id1) = interp1(p1, f1, u1_log(id1));
+
+id2 = (q>q1(end));
+f(id2) = interp1(q2, f2, q(id2));
+u1_log(id2) = interp1(q2, opt_u1, q(id2));
+u2_log(id2) = interp1(q2, opt_u2, q(id2));
+f_u1(id2) = interp1(p1, f1, u1_log(id2));
+f_u2(id2) = interp1(p1, f1, u2_log(id2));
+
+v1_log = u1_log - 0.08*coal_nameplate;
+v2_log = zeros(1,length(q));
+v2_log(u2_log>0) = u2_log(u2_log>0) - 0.08*coal_nameplate;
+
+% ================================
+figure(6); clf; hold on; box on;
+plot(q0, f0, 'x', q1, f1, '-', q2, opt_f, '-', 'linewidth', 1);
+
+xlabel('Power Output, MW (exclude in-house generation)')
+ylabel('Coal Consumption (ton/hr)');
+ylim([0 400]);
+xlim([0 1250]);
+grid on;
+set(gca, 'layer', 'top');
+legend('No Unit is Commited', 'One Unit is Commited', 'Two Units are Commited');
+set(legend, 'location', 'northwest');
+
+% ================================
+figure(7); clf; hold on; box on;
+plot(q0, f0, 'x', q1, f1, '-', q2, opt_f, '-', 'linewidth', 1);
+% area(q,f, 'facec', [0.8 0.95 1], 'edgecolor', 'none');
+ha = area(q, [f_u1;f_u2]');
+set(ha(1), 'facec', [0.8 0.95 1], 'edgecolor', 'none');
+set(ha(2), 'facec', [1 0.8 0.8], 'edgecolor', 'none');
+
+xlabel('Power Output, MW (exclude in-house generation)')
+ylabel('Coal Consumption (ton/hr)');
+ylim([0 400]);
+xlim([0 1250]);
+grid on;
+set(gca, 'layer', 'top');
+legend(ha, '1st Unit', '2nd Unit');
+set(legend, 'location', 'northwest');
+
+% ================================
+figure(8); clf; hold on; box on;
+ha = area(q, [u1_log;u2_log]');
+set(ha(1), 'facec', [0.8 0.95 1], 'edgecolor', 'none');
+set(ha(2), 'facec', [1 0.8 0.8], 'edgecolor', 'none');
+plot(q, v1_log + v2_log, 'linewidth', 1);
+xlabel('Power Output, MW (exclude in-house generation)')
+ylabel('Power Output (MW)');
+ylim([0 1400]);
+xlim([0 1250]);
+grid on;
+set(gca, 'layer', 'top');
+legend('1st Unit', '2nd Unit', 'Useful Output');
+set(legend, 'location', 'northwest');
 
