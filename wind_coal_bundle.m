@@ -95,47 +95,46 @@ end
 
 
 %% two coal units
-dx1 = 1000;
-dx2 = 1001;
-u_coal_unit1 = linspace(0.4,1,dx1) * coal_nameplate;
-u_coal_unit2 = linspace(0.4,1,dx2) * coal_nameplate;
-f_coal_unit1 = (266*linspace(0.4,1,dx1).^2 -507*linspace(0.4,1,dx1) + 542).*linspace(0.4,1,dx1)*coal_nameplate/1e3; %[g/kWh]
-f_coal_unit2 = (266*linspace(0.4,1,dx2).^2 -507*linspace(0.4,1,dx2) + 542).*linspace(0.4,1,dx2)*coal_nameplate/1e3; %[g/kWh]
-[f1,f2] = meshgrid(f_coal_unit1,f_coal_unit2);
-f_coal = f1 + f2;
+% dx1 = 1000;
+% dx2 = 1001;
+% u_coal_unit1 = linspace(0.4,1,dx1) * coal_nameplate;
+% u_coal_unit2 = linspace(0.4,1,dx2) * coal_nameplate;
+% f_coal_unit1 = (266*linspace(0.4,1,dx1).^2 -507*linspace(0.4,1,dx1) + 542).*linspace(0.4,1,dx1)*coal_nameplate/1e3; %[g/kWh]
+% f_coal_unit2 = (266*linspace(0.4,1,dx2).^2 -507*linspace(0.4,1,dx2) + 542).*linspace(0.4,1,dx2)*coal_nameplate/1e3; %[g/kWh]
+% [f1,f2] = meshgrid(f_coal_unit1,f_coal_unit2);
+% f_coal = f1 + f2;
+% 
+% tic;
+% uu_range = (0.4*coal_nameplate*2):1:(coal_nameplate*2);
+% vv_range = uu_range - 0.08*coal_nameplate*2;
+% opt_u1 = -1*ones(1,length(uu_range));
+% opt_u2 = -1*ones(1,length(uu_range));
+% opt_f = -1*ones(1,length(uu_range));
+% flag = -1*ones(1,length(uu_range)); % 1: pass; -1: fail
+% for i = 1:length(uu_range)
+%     q = vv_range(i);
+%     u1 = linspace(min(u_coal_unit1),max(u_coal_unit1),2000);
+%     v1 = u1 - 0.08*coal_nameplate;
+%     v2 = q - v1;
+%     u2 = v2 + 0.08*coal_nameplate;
+%     f = interp2(u_coal_unit1, u_coal_unit2, f_coal, u1, u2);
+%     if any(~isnan(f))
+%         [value,id] = min(f);
+%         opt_u1(i) = u1(id);
+%         opt_u2(i) = u2(id);
+%         opt_f(i) = value;
+%         flag(i) = 1;
+%     end
+% end
+% exclud_id = find(flag==-1);
+% uu_range(exclud_id) = [];
+% vv_range(exclud_id) = [];
+% opt_u1(exclud_id) = [];
+% opt_u2(exclud_id) = [];
+% opt_f(exclud_id) = [];
+% toc;
 
-tic;
-uu_range = (0.4*coal_nameplate*2):1:(coal_nameplate*2);
-vv_range = uu_range - 0.08*coal_nameplate*2;
-opt_u1 = -1*ones(1,length(uu_range));
-opt_u2 = -1*ones(1,length(uu_range));
-opt_f = -1*ones(1,length(uu_range));
-flag = -1*ones(1,length(uu_range)); % 1: pass; -1: fail
-for i = 1:length(uu_range)
-    q = vv_range(i);
-    u1 = linspace(min(u_coal_unit1),max(u_coal_unit1),2000);
-    v1 = u1 - 0.08*coal_nameplate;
-    v2 = q - v1;
-    u2 = v2 + 0.08*coal_nameplate;
-    f = interp2(u_coal_unit1, u_coal_unit2, f_coal, u1, u2);
-    if any(~isnan(f))
-        [value,id] = min(f);
-        opt_u1(i) = u1(id);
-        opt_u2(i) = u2(id);
-        opt_f(i) = value;
-        flag(i) = 1;
-    end
-end
-exclud_id = find(flag==-1);
-uu_range(exclud_id) = [];
-vv_range(exclud_id) = [];
-opt_u1(exclud_id) = [];
-opt_u2(exclud_id) = [];
-opt_f(exclud_id) = [];
-toc;
-
-
-%% ========================================================================
+% ========================================================================
 plot_switch = 'off'; % on/off
 switch plot_switch
     case 'on' % don't plot
@@ -224,9 +223,9 @@ my_gridline;
 end
 
 
-%% ========================================================================
+% ========================================================================
 % one unit vs. two units
-plot_switch = 'on'; % on/off
+plot_switch = 'off'; % on/off
 switch plot_switch
     case 'on'
 p0 = 0;
@@ -313,5 +312,19 @@ set(legend, 'location', 'northwest');
         ;
 end
 
+
+%% three coal units
+dx1 = 20;
+dx2 = 21;
+dx3 = 22;
+u_coal_unit1 = linspace(0.4,1,dx1) * coal_nameplate;
+u_coal_unit2 = linspace(0.4,1,dx2) * coal_nameplate;
+u_coal_unit3 = linspace(0.4,1,dx3) * coal_nameplate;
+
+f_coal_unit1 = (266*linspace(0.4,1,dx1).^2 -507*linspace(0.4,1,dx1) + 542).*linspace(0.4,1,dx1)*coal_nameplate/1e3; %[g/kWh]
+f_coal_unit2 = (266*linspace(0.4,1,dx2).^2 -507*linspace(0.4,1,dx2) + 542).*linspace(0.4,1,dx2)*coal_nameplate/1e3; %[g/kWh]
+f_coal_unit3 = (266*linspace(0.4,1,dx2).^2 -507*linspace(0.4,1,dx2) + 542).*linspace(0.4,1,dx2)*coal_nameplate/1e3; %[g/kWh]
+[f1,f2,f3] = meshgrid(f_coal_unit1,f_coal_unit2,f_coal_unit3);
+f_coal = f1 + f2 + f3;
 
 
