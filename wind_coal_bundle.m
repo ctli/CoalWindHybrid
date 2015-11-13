@@ -317,9 +317,9 @@ end
 
 %% three coal units
 coal_num = 3;
-dx1 = 100;
-dx2 = 100;
-dx3 = 100;
+dx1 = 200;
+dx2 = 200;
+dx3 = 200;
 u_coal_unit1 = linspace(0.4,1,dx1) * coal_nameplate;
 u_coal_unit2 = linspace(0.4,1,dx2) * coal_nameplate;
 u_coal_unit3 = linspace(0.4,1,dx3) * coal_nameplate;
