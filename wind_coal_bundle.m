@@ -136,7 +136,7 @@ end
 % opt_f(exclud_id) = [];
 % toc;
 
-% ========================================================================
+%% ========================================================================
 plot_switch = 'off'; % on/off
 switch plot_switch
     case 'on' % don't plot
@@ -220,12 +220,37 @@ set(gcf, 'unit', 'inch', 'pos', [11.4    1.0900    5.0000    3.7500]);
 axis equal;
 axis([200 800 200 800]);
 my_gridline;
+
+% ================================
+figure(51); clf; hold on; box on;
+ha = area(vv_range, [opt_u1; opt_u2]');
+plot(vv_range, vv_range, 'linewidth', 1);
+set(ha(1), 'facec', [0.8 0.95 1], 'edgecolor', 'none');
+set(ha(2), 'facec', [1 0.8 0.8], 'edgecolor', 'none');
+xlabel('Power Output, MW (exclude in-house generation)')
+ylabel('Power Production (MW)');
+xlim([400 1250]);
+legend('u1', 'u2', 'Useful Output');
+set(legend, 'location', 'northwest');
+
+figure(52); clf; hold on; box on;
+opt_f1 = interp1(u_coal_unit1, f_coal_unit1, opt_u1);
+opt_f2 = interp1(u_coal_unit2, f_coal_unit2, opt_u2);
+ha = area(vv_range, [opt_f1; opt_f2]');
+set(ha(1), 'facec', [0.8 0.95 1], 'edgecolor', 'none');
+set(ha(2), 'facec', [1 0.8 0.8], 'edgecolor', 'none');
+xlabel('Power Output, MW (exclude in-house generation)')
+ylabel('Coal Consumption (ton/h)');
+xlim([400 1250]);
+legend(ha, 'u1', 'u2');
+set(legend, 'location', 'northwest');
+
     otherwise % don't plot
         ;
 end
 
 
-% ========================================================================
+%% ========================================================================
 % one unit vs. two units
 plot_switch = 'off'; % on/off
 switch plot_switch
@@ -316,33 +341,169 @@ end
 
 
 %% three coal units
-coal_num = 3;
-dx1 = 200;
-dx2 = 200;
-dx3 = 200;
+% dx1 = 100;
+% dx2 = 100;
+% dx3 = 100;
+% u_coal_unit1 = linspace(0.4,1,dx1) * coal_nameplate;
+% u_coal_unit2 = linspace(0.4,1,dx2) * coal_nameplate;
+% u_coal_unit3 = linspace(0.4,1,dx3) * coal_nameplate;
+% u_coal_unit1 = roundn(u_coal_unit1, -1);
+% u_coal_unit2 = roundn(u_coal_unit2, -1);
+% u_coal_unit3 = roundn(u_coal_unit3, -1);
+% [u1_mesh, u2_mesh, u3_mesh] = meshgrid(u_coal_unit1, u_coal_unit2, u_coal_unit3);
+% 
+% v_coal_unit1 = u_coal_unit1-0.08*coal_nameplate;
+% v_coal_unit2 = u_coal_unit2-0.08*coal_nameplate;
+% v_coal_unit3 = u_coal_unit3-0.08*coal_nameplate;
+% v_coal_unit1 = roundn(v_coal_unit1, -1);
+% v_coal_unit2 = roundn(v_coal_unit2, -1);
+% v_coal_unit3 = roundn(v_coal_unit3, -1);
+% [v1_mesh, v2_mesh, v3_mesh] = meshgrid(v_coal_unit1, v_coal_unit2, v_coal_unit3);
+% v = v1_mesh + v2_mesh + v3_mesh;
+% 
+% f_coal_unit1 = (266*linspace(0.4,1,dx1).^2 -507*linspace(0.4,1,dx1) + 542).*linspace(0.4,1,dx1)*coal_nameplate/1e3; %[g/kWh]
+% f_coal_unit2 = (266*linspace(0.4,1,dx2).^2 -507*linspace(0.4,1,dx2) + 542).*linspace(0.4,1,dx2)*coal_nameplate/1e3;
+% f_coal_unit3 = (266*linspace(0.4,1,dx3).^2 -507*linspace(0.4,1,dx3) + 542).*linspace(0.4,1,dx3)*coal_nameplate/1e3;
+% [f1, f2, f3] = meshgrid(f_coal_unit1, f_coal_unit2, f_coal_unit3);
+% f_coal = f1 + f2 + f3;
+% 
+% v_unique = unique(v(:)); % 51x1
+% opt_f = -1*ones(1, length(v_unique));
+% opt_u1 = -1*ones(1, length(v_unique));
+% opt_u2 = -1*ones(1, length(v_unique));
+% opt_u3 = -1*ones(1, length(v_unique));
+% opt_v1 = -1*ones(1, length(v_unique));
+% opt_v2 = -1*ones(1, length(v_unique));
+% opt_v3 = -1*ones(1, length(v_unique));
+% 
+% tic;
+% for i = 1:length(v_unique)
+%     id_extract = find(v(:)==v_unique(i));
+%     
+%     if length(id_extract) > 1
+%         f = f_coal(id_extract);
+%         u1_extract = u1_mesh(id_extract);
+%         u2_extract = u2_mesh(id_extract);
+%         u3_extract = u3_mesh(id_extract);
+%         v1_extract = v1_mesh(id_extract);
+%         v2_extract = v2_mesh(id_extract);
+%         v3_extract = v3_mesh(id_extract);
+%         
+%         id2 = u2_extract >= u1_extract;
+%         id3 = u3_extract >= u2_extract;
+%         check_valid = id2 & id3;
+%         id_valid = find(check_valid == 1);
+%         
+%         if isempty(id_valid)
+%             disp('error!!!');
+%         elseif length(id_valid) == 1
+%             opt_f(i) = f(id_valid);
+%             opt_u1(i) = u1_mesh(id_extract(id_valid));
+%             opt_u2(i) = u2_mesh(id_extract(id_valid));
+%             opt_u3(i) = u3_mesh(id_extract(id_valid));
+%             opt_v1(i) = v1_mesh(id_extract(id_valid));
+%             opt_v2(i) = v2_mesh(id_extract(id_valid));
+%             opt_v3(i) = v3_mesh(id_extract(id_valid));
+%         else % length(id_valid) > 1
+%             f_valid = f(id_valid);
+%             [value, id_opt] = min(f_valid);
+%             opt_f(i) = value;
+%             opt_u1(i) = u1_mesh(id_extract(id_valid(id_opt)));
+%             opt_u2(i) = u2_mesh(id_extract(id_valid(id_opt)));
+%             opt_u3(i) = u3_mesh(id_extract(id_valid(id_opt)));
+%             opt_v1(i) = v1_mesh(id_extract(id_valid(id_opt)));
+%             opt_v2(i) = v2_mesh(id_extract(id_valid(id_opt)));
+%             opt_v3(i) = v3_mesh(id_extract(id_valid(id_opt)));
+%         end
+%     else
+%         opt_f(i) = f_coal(id_extract);
+%         opt_u1(i) = u1_mesh(id_extract);
+%         opt_u2(i) = u2_mesh(id_extract);
+%         opt_u3(i) = u3_mesh(id_extract);
+%         opt_v1(i) = v1_mesh(id_extract);
+%         opt_v2(i) = v2_mesh(id_extract);
+%         opt_v3(i) = v3_mesh(id_extract);
+%     end
+% end
+% tt = toc;
+% 
+% exclud_id = find(opt_f==-1);
+% v_unique(exclud_id) = [];
+% opt_u1(exclud_id) = [];
+% opt_u2(exclud_id) = [];
+% opt_u3(exclud_id) = [];
+% opt_v1(exclud_id) = [];
+% opt_v2(exclud_id) = [];
+% opt_v3(exclud_id) = [];
+% opt_f(exclud_id) = [];
+% 
+% if (dx1 == 100)
+% save('ThreeUnits', ...
+%      'v_unique', 'opt_f', ...
+%      'opt_u1', 'opt_u2', 'opt_u3', ...
+%      'opt_v1', 'opt_v2', 'opt_v3', ...
+%      'dx1', 'dx2', 'dx3');
+% end
+% 
+% % =================================
+% figure(9); clf;  hold on; box on;
+% ha = area(v_unique, [opt_u1; opt_u2; opt_u3]', 'edgecolor', 'none');
+% plot(v_unique, opt_v1+opt_v2+opt_v3);
+% set(ha(1), 'facec', [0.5 0.85 1]);
+% set(ha(2), 'facec', [1 0.6 0.6]);
+% set(ha(3), 'facec', [1 0.8 0]);
+% xlim([600 1850]);
+% title([num2str(dx1), 'x' num2str(dx2), 'x' num2str(dx3), ' (', num2str(tt, '%10.1f'), ' sec)']);
+% xlabel('Power Output (MW) (exclude in-house use)');
+% ylabel('Power Production (MW)');
+% legend('u1', 'u2', 'u3', 'Useful Output');
+% set(legend, 'location', 'northwest');
+
+
+%% Four units
+tic;
+dx1 = 80;
+dx2 = 80;
+dx3 = 80;
+dx4 = 80;
 u_coal_unit1 = linspace(0.4,1,dx1) * coal_nameplate;
 u_coal_unit2 = linspace(0.4,1,dx2) * coal_nameplate;
 u_coal_unit3 = linspace(0.4,1,dx3) * coal_nameplate;
-[u1_mesh, u2_mesh, u3_mesh] = meshgrid(u_coal_unit1, u_coal_unit2, u_coal_unit3);
+u_coal_unit4 = linspace(0.4,1,dx4) * coal_nameplate;
+u_coal_unit1 = roundn(u_coal_unit1, -1);
+u_coal_unit2 = roundn(u_coal_unit2, -1);
+u_coal_unit3 = roundn(u_coal_unit3, -1);
+u_coal_unit4 = roundn(u_coal_unit4, -1);
+[u1_mesh, u2_mesh, u3_mesh, u4_mesh] = ndgrid(u_coal_unit1, u_coal_unit2, u_coal_unit3, u_coal_unit4);
 
 v_coal_unit1 = u_coal_unit1-0.08*coal_nameplate;
 v_coal_unit2 = u_coal_unit2-0.08*coal_nameplate;
 v_coal_unit3 = u_coal_unit3-0.08*coal_nameplate;
-[v1_mesh, v2_mesh, v3_mesh] = meshgrid(v_coal_unit1, v_coal_unit2, v_coal_unit3);
-v = v1_mesh + v2_mesh + v3_mesh;
-id2 = v2_mesh>v1_mesh;
-id3 = v3_mesh>v2_mesh;
+v_coal_unit4 = u_coal_unit4-0.08*coal_nameplate;
+v_coal_unit1 = roundn(v_coal_unit1, -1);
+v_coal_unit2 = roundn(v_coal_unit2, -1);
+v_coal_unit3 = roundn(v_coal_unit3, -1);
+v_coal_unit4 = roundn(v_coal_unit4, -1);
+[v1_mesh, v2_mesh, v3_mesh, v4_mesh] = ndgrid(v_coal_unit1, v_coal_unit2, v_coal_unit3, v_coal_unit4);
+v = v1_mesh + v2_mesh + v3_mesh + v4_mesh;
 
 f_coal_unit1 = (266*linspace(0.4,1,dx1).^2 -507*linspace(0.4,1,dx1) + 542).*linspace(0.4,1,dx1)*coal_nameplate/1e3; %[g/kWh]
-f_coal_unit2 = (266*linspace(0.4,1,dx2).^2 -507*linspace(0.4,1,dx2) + 542).*linspace(0.4,1,dx2)*coal_nameplate/1e3; %create tiny difference to eliminate non-unique solutions
-f_coal_unit3 = (266*linspace(0.4,1,dx2).^2 -507*linspace(0.4,1,dx2) + 542).*linspace(0.4,1,dx2)*coal_nameplate/1e3; %create tiny differenct
-[f1,f2,f3] = meshgrid(f_coal_unit1,f_coal_unit2,f_coal_unit3);
-f_coal = f1 + f2 + f3;
+f_coal_unit2 = (266*linspace(0.4,1,dx2).^2 -507*linspace(0.4,1,dx2) + 542).*linspace(0.4,1,dx2)*coal_nameplate/1e3;
+f_coal_unit3 = (266*linspace(0.4,1,dx2).^2 -507*linspace(0.4,1,dx3) + 542).*linspace(0.4,1,dx3)*coal_nameplate/1e3;
+f_coal_unit4 = (266*linspace(0.4,1,dx2).^2 -507*linspace(0.4,1,dx4) + 542).*linspace(0.4,1,dx4)*coal_nameplate/1e3;
+[f1, f2, f3, f4] = ndgrid(f_coal_unit1, f_coal_unit2, f_coal_unit3, f_coal_unit4);
+f_coal = f1 + f2 + f3 + f4;
+toc;
 
-v_unique = unique(v(:)); % 51x1
+v_unique = unique(v(:));
 opt_u1 = -1*ones(1, length(v_unique));
 opt_u2 = -1*ones(1, length(v_unique));
 opt_u3 = -1*ones(1, length(v_unique));
+opt_u4 = -1*ones(1, length(v_unique));
+opt_v1 = -1*ones(1, length(v_unique));
+opt_v2 = -1*ones(1, length(v_unique));
+opt_v3 = -1*ones(1, length(v_unique));
+opt_v4 = -1*ones(1, length(v_unique));
 opt_f = -1*ones(1, length(v_unique));
 
 tic;
@@ -354,10 +515,16 @@ for i = 1:length(v_unique)
         u1_extract = u1_mesh(id_extract);
         u2_extract = u2_mesh(id_extract);
         u3_extract = u3_mesh(id_extract);
+        u4_extract = u4_mesh(id_extract);
+        v1_extract = v1_mesh(id_extract);
+        v2_extract = v2_mesh(id_extract);
+        v3_extract = v3_mesh(id_extract);
+        v4_extract = v4_mesh(id_extract);
         
         id2 = u2_extract >= u1_extract;
         id3 = u3_extract >= u2_extract;
-        check_valid = id2 & id3;
+        id4 = u4_extract >= u3_extract;
+        check_valid = id2 & id3 & id4;
         id_valid = find(check_valid == 1);
         
         if isempty(id_valid)
@@ -367,6 +534,11 @@ for i = 1:length(v_unique)
             opt_u1(i) = u1_mesh(id_extract(id_valid));
             opt_u2(i) = u2_mesh(id_extract(id_valid));
             opt_u3(i) = u3_mesh(id_extract(id_valid));
+            opt_u4(i) = u4_mesh(id_extract(id_valid));
+            opt_v1(i) = v1_mesh(id_extract(id_valid));
+            opt_v2(i) = v2_mesh(id_extract(id_valid));
+            opt_v3(i) = v3_mesh(id_extract(id_valid));
+            opt_v4(i) = v4_mesh(id_extract(id_valid));
         else % length(id_valid) > 1
             f_valid = f(id_valid);
             [value, id_opt] = min(f_valid);
@@ -374,33 +546,58 @@ for i = 1:length(v_unique)
             opt_u1(i) = u1_mesh(id_extract(id_valid(id_opt)));
             opt_u2(i) = u2_mesh(id_extract(id_valid(id_opt)));
             opt_u3(i) = u3_mesh(id_extract(id_valid(id_opt)));
+            opt_u4(i) = u4_mesh(id_extract(id_valid(id_opt)));
+            opt_v1(i) = v1_mesh(id_extract(id_valid(id_opt)));
+            opt_v2(i) = v2_mesh(id_extract(id_valid(id_opt)));
+            opt_v3(i) = v3_mesh(id_extract(id_valid(id_opt)));
+            opt_v4(i) = v4_mesh(id_extract(id_valid(id_opt)));
         end
-    else
+    else % length(id_extract) == 1
         opt_f(i) = f_coal(id_extract);
         opt_u1(i) = u1_mesh(id_extract);
         opt_u2(i) = u2_mesh(id_extract);
         opt_u3(i) = u3_mesh(id_extract);
+        opt_u4(i) = u4_mesh(id_extract);
+        opt_v1(i) = v1_mesh(id_extract);
+        opt_v2(i) = v2_mesh(id_extract);
+        opt_v3(i) = v3_mesh(id_extract);
+        opt_v4(i) = v4_mesh(id_extract);
     end
 end
-tt = toc;
+tt = toc
 
 exclud_id = find(opt_f==-1);
 v_unique(exclud_id) = [];
 opt_u1(exclud_id) = [];
 opt_u2(exclud_id) = [];
 opt_u3(exclud_id) = [];
+opt_u4(exclud_id) = [];
+opt_v1(exclud_id) = [];
+opt_v2(exclud_id) = [];
+opt_v3(exclud_id) = [];
+opt_v4(exclud_id) = [];
 opt_f(exclud_id) = [];
 
-%%
-figure(9); clf;
-ha = area(v_unique, [opt_u1; opt_u2; opt_u3]', 'edgecolor', 'none');
+if (dx1==80)
+save('FourUnits', ...
+     'v_unique', 'opt_f', ...
+     'opt_u1', 'opt_u2', 'opt_u3', 'opt_u4', ...
+     'opt_v1', 'opt_v2', 'opt_v3', 'opt_v4', ...
+     'dx1', 'dx2', 'dx3', 'dx4');
+end
+
+% =================================
+figure(10); clf; hold on; box on;
+ha = area(v_unique, [opt_u1; opt_u2; opt_u3; opt_u4]', 'edgecolor', 'none');
+plot(v_unique, opt_v1+opt_v2+opt_v3+opt_v4);
 set(ha(1), 'facec', [0.5 0.85 1]);
 set(ha(2), 'facec', [1 0.6 0.6]);
 set(ha(3), 'facec', [1 0.8 0]);
-xlim([600 1850]);
+xlim([800 2500]);
 title([num2str(dx1), 'x' num2str(dx2), 'x' num2str(dx3), ' (', num2str(tt, '%10.1f'), ' sec)']);
 xlabel('Power Output (MW) (exclude in-house use)');
 ylabel('Power Production (MW)');
-legend('u1', 'u2', 'u3');
+legend('u1', 'u2', 'u3', 'u4', 'Useful Output');
 set(legend, 'location', 'northwest');
+
 
