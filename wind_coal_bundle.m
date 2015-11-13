@@ -1,9 +1,7 @@
-% 2.5 GW wind at Xilingol in best year (1987) & 9240 MW of coal (660 MW x 14)
 clear
 close all
 clc
 
-%% supercritical air cooling
 coal_nameplate = 660; % [MW]
 
 plot_switch = 'off'; % on/off
@@ -97,8 +95,6 @@ end
 
 
 %% two coal units
-% dx1 = 1000;
-% dx2 = 1001;
 dx1 = 1000;
 dx2 = 1001;
 u_coal_unit1 = linspace(0.4,1,dx1) * coal_nameplate;
@@ -138,6 +134,7 @@ opt_u2(exclud_id) = [];
 opt_f(exclud_id) = [];
 toc;
 
+
 %% ========================================================================
 plot_switch = 'off'; % on/off
 switch plot_switch
@@ -163,7 +160,6 @@ zlabel('Combined Power Output (MW)');
 view(315, 35);
 set(gcf, 'unit', 'inch', 'pos', [1.0    5.85    5.0000    3.7500]);
 
-% ==============================
 figure(31); clf;
 mesh(u_coal_unit1, u_coal_unit2, p_coal); hold on;
 plot3(opt_u1, opt_u2, uu_range, 'o-', 'linewidth', 1, 'markersize', 4);
@@ -230,6 +226,9 @@ end
 
 %% ========================================================================
 % one unit vs. two units
+plot_switch = 'on'; % on/off
+switch plot_switch
+    case 'on'
 p0 = 0;
 q0 = 0;
 f0 = 0;
@@ -310,4 +309,9 @@ grid on;
 set(gca, 'layer', 'top');
 legend('1st Unit', '2nd Unit', 'Useful Output');
 set(legend, 'location', 'northwest');
+    case 'off'
+        ;
+end
+
+
 
