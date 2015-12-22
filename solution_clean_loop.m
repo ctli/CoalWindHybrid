@@ -17,14 +17,30 @@ f_min = min(f_coal_unit);
 
 
 %% ========================================================================
-figure(3); clf; hold on; box on;
+% 211.2~8500.8MW -> round to 220-8500MW
+v_range = 220:0.1:8500; % [1x415]
+u_table = zeros(coal_num, length(v_range), coal_num);
+v_table = zeros(coal_num, length(v_range), coal_num);
+f_table = zeros(length(v_range), coal_num);
+id_st = zeros(coal_num, 1); % Starting entry that is not nan
+id_ed = zeros(coal_num, 1); % Ending entry that is not nan
 
+figure(3); clf; hold on; box on;
 % No unit
 plot(0, 0, 'x');
 
 % ====================
 % One unit
 n = 1;
+u1_extended = interp1(v_coal_unit, u_coal_unit, v_range);
+u_table(n,:,n) =  u1_extended;
+v1_extended = interp1(v_coal_unit, v_coal_unit, v_range);
+v_table(n,:,n) =  v1_extended;
+f1_extended = interp1(v_coal_unit, f_coal_unit, v_range);
+f_table(:,n) =  f1_extended;
+id_st(n) = find(~isnan(f1_extended)==1, 1, 'first');
+id_ed(n) = find(~isnan(f1_extended)==1, 1, 'last');
+
 plot(v_coal_unit, f_coal_unit);
 text(v_coal_unit(end), f_coal_unit(end), ' 1 Unit is commited', 'fontsize', 7);
 
@@ -78,14 +94,23 @@ for n = 2:coal_num
         opt_u(nn,:) = u1_extended(id);
         v1_extended = squeeze(u_extended(nn,:,:))';
         opt_v(nn,:) = v1_extended(id);
+        
+        % Save opt solutions to tables
+        u1_extended = interp1(v_long, opt_u(nn,:), v_range);
+        u_table(nn,:,n) = u1_extended;
+        v1_extended = interp1(v_long, opt_v(nn,:), v_range);
+        v_table(nn,:,n) = v1_extended;
     end
+    f_extended = interp1(v_long, opt_f, v_range);
+    f_table(:,n) = f_extended;
+    id_st(n) = find(~isnan(f_extended)==1, 1, 'first');
+    id_ed(n) = find(~isnan(f_extended)==1, 1, 'last');
     
     id_bad = isnan(opt_f);
     v_long(id_bad) = [];
     opt_f(id_bad) = [];
     opt_u(:,id_bad) = [];
     opt_v(:,id_bad) = [];
-    
     plot(v_long, opt_f);
     if n<11
     text(v_long(end), opt_f(end), [' ', num2str(n), ' Units are commited'], 'fontsize', 7);
@@ -98,6 +123,15 @@ xlabel('Output Power, MW (in-house use excluded)');
 ylabel('Coal Consumption (ton/h)');
 my_gridline;
 
+% ====================
+v_st = v_range(id_st);
+v_ed = v_range(id_ed);
+% save('OptTable', ...
+%      'v_range', ...
+%      'f_table', 'u_table', 'v_table', ...
+%      'id_st', 'id_ed', 'v_st', 'v_ed');
+
+% ====================
 % figure(1); clf;
 % opt_u = flipud(opt_u);
 % for nn = 1:n
