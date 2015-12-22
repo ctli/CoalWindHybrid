@@ -66,19 +66,19 @@ for n = 2:coal_num
     u_sum = zeros(n, dx);
     v_sum = zeros(n, dx);
     f_sum = zeros(n, dx);
-    for cmtd = 1:n
-        u(cmtd,:) = u_coal_unit;
-        v(cmtd,:) = v_coal_unit;
-        f(cmtd,:) = f_coal_unit;
+    for cmt = 1:n
+        u(cmt,:) = u_coal_unit;
+        v(cmt,:) = v_coal_unit;
+        f(cmt,:) = f_coal_unit;
         
-        u_sum(cmtd,:) = sum(u);
-        v_sum(cmtd,:) = sum(v);
-        f_sum(cmtd,:) = sum(f);
+        u_sum(cmt,:) = sum(u);
+        v_sum(cmt,:) = sum(v);
+        f_sum(cmt,:) = sum(f);
         
         for nn = 1:n
-            u_extended(nn,:,cmtd) = interp1(v_sum(cmtd,:),u(nn,:),v_long);
-            v_extended(nn,:,cmtd) = interp1(v_sum(cmtd,:),v(nn,:),v_long);
-            f_extended(nn,:,cmtd) = interp1(v_sum(cmtd,:),f(nn,:),v_long);
+            u_extended(nn,:,cmt) = interp1(v_sum(cmt,:),u(nn,:),v_long);
+            v_extended(nn,:,cmt) = interp1(v_sum(cmt,:),v(nn,:),v_long);
+            f_extended(nn,:,cmt) = interp1(v_sum(cmt,:),f(nn,:),v_long);
         end
     end
     f_combined = squeeze(sum(f_extended))';
@@ -119,13 +119,26 @@ for n = 2:coal_num
     end
     toc;
 end
+v_st = v_range(id_st);
+v_ed = v_range(id_ed);
 xlabel('Output Power, MW (in-house use excluded)');
 ylabel('Coal Consumption (ton/h)');
 my_gridline;
 
+
+
 % ====================
-v_st = v_range(id_st);
-v_ed = v_range(id_ed);
+% flag_badrow = boolean(zeros(1,length(v_range)));
+% for vv = 1:length(v_range)
+%     f_row = f_table(vv,:);
+%     if all(isnan(f_row))
+%         flag_badrow(vv) = 1;
+%     end
+% end
+% f_table(flag_badrow,:) = [];
+% u_table(:,flag_badrow,:) = [];
+% v_table(:,flag_badrow,:) = [];
+% v_range(flag_badrow) = [];
 % save('OptTable', ...
 %      'v_range', ...
 %      'f_table', 'u_table', 'v_table', ...
