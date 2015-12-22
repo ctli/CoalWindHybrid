@@ -30,12 +30,6 @@ text(v_coal_unit(end), f_coal_unit(end), ' 1 Unit is commited', 'fontsize', 7);
 
 % ====================
 % Multiple units
-% 2 units; 0.008600 sec
-% 3 units; 0.013865 sec
-% 4 units; 0.021214 sec
-% 5 units; 0.030380 sec
-% 10 units; 0.116095 sec
-% 14 units; 0.241221 sec
 tic;
 for n = 2:coal_num
     v_long = v_coal_unit*n;
@@ -98,51 +92,7 @@ xlabel('Output Power, MW (in-house use excluded)');
 ylabel('Coal Consumption (ton/h)');
 my_gridline;
 
-% figure(1); clf;
-% opt_u = flipud(opt_u);
-% for nn = 1:n
-%     subplot(n+1,1,nn);
-%     plot(v_long, opt_u(nn,:));
-%     ylim([0 700]);
-%     set(gca, 'ytick', 0:350:700);
-%     ylabel(['u', num2str(nn)]);
-% end
-% subplot(n+1,1,n+1);
-% area(v_long, opt_u', 'edgecolor', 'none');
-% ylim([0 4000]);
 
-
-%% Double check 3-units result to be identical to solution_clean.m
-% figure(2); clf;
-% subplot(4,1,1); hold on; box on;
-% plot(v_long, opt_u(1,:), 'linewidth', 1); hold on;
-% ylim([0 700]);
-% ylabel('u1');
-% 
-% subplot(4,1,2); hold on; box on;
-% plot(v_long, opt_u(2,:), 'linewidth', 1); hold on;
-% ylim([0 700]);
-% ylabel('u2');
-% 
-% subplot(4,1,3); hold on; box on;
-% plot(v_long, opt_u(3,:), 'linewidth', 1); hold on;
-% ylim([0 700]);
-% ylabel('u3');
-% 
-% subplot(4,1,4); hold on; box on;
-% ha = area(v_long, opt_u', 'edgecolor', 'none');
-% set(ha(1), 'facec', [0.8 0.95 1], 'edgecolor', 'none');
-% set(ha(2), 'facec', [1 0.8 0.8], 'edgecolor', 'none');
-% set(ha(3), 'facec', [1 0.8 0], 'edgecolor', 'none');
-% legend('u1', 'u2', 'u3');
-% set(legend, 'location', 'northwest');
-% 
-% load ThreeUnitsClean;
-% subplot(4,1,3);
-% plot(v_unique, opt_u1, '--'); hold on;
-% subplot(4,1,2);
-% plot(v_unique, opt_u2, '--'); hold on;
-% subplot(4,1,1);
-% plot(v_unique, opt_u3, '--'); hold on;
+%% myopic unit commitment
 
 
