@@ -91,14 +91,14 @@ set(ax2, 'xaxislocation', 'top', 'xlim', x_lim, 'xtick', x_ticklabel*coal_namepl
 set(ax2, 'yaxislocation', 'right', 'ylim', y_lim, 'ytick', y_tick, 'yticklabel', []);
 xlabel('Output Power (Normalized)', 'fontsize', 9);
     case 'off'
-        ;
+        % Nothing
 end
 
 
 %% two coal units
 coal_num = 2;
-dx1 = 1000; % 4.33GB RAM
-dx2 = 1000;
+dx1 = 200; % 1000x1000 = 4.33GB RAM
+dx2 = 200;
 u_coal_unit1 = linspace(0.4,1,dx1) * coal_nameplate;
 u_coal_unit2 = linspace(0.4,1,dx2) * coal_nameplate;
 [u1_mesh, u2_mesh] = meshgrid(u_coal_unit1, u_coal_unit2);
@@ -142,11 +142,11 @@ opt_u2(exclud_id) = [];
 opt_f(exclud_id) = [];
 toc;
 
-save('TwoUnits', ...
-     'v_unique', 'opt_f', ...
-     'opt_u1', 'opt_u2', ...
-     'opt_v1', 'opt_v2', ...
-     'dx1', 'dx2');
+% save('TwoUnits', ...
+%      'v_unique', 'opt_f', ...
+%      'opt_u1', 'opt_u2', ...
+%      'opt_v1', 'opt_v2', ...
+%      'dx1', 'dx2');
 
 figure(3); clf; hold on; box on;
 ha = area(v_unique, [opt_u1; opt_u2]');
@@ -257,7 +257,7 @@ axis equal;
 axis([200 800 200 800]);
 my_gridline;
     otherwise % don't plot
-        ;
+        % Nothing
 end
 
 
