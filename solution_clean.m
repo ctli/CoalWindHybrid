@@ -23,94 +23,7 @@ coal_nameplate = 660; % [MW]
 
 
 %% Two units 
-% dx = 1000; % 0.115275 sec
-% u_coal_unit = linspace(0.4,1,dx) * coal_nameplate;
-% v_coal_unit = u_coal_unit-0.08*coal_nameplate;
-% f_coal_unit = (266*linspace(0.4,1,dx).^2 -507*linspace(0.4,1,dx) + 542).*linspace(0.4,1,dx)*coal_nameplate/1e3; %[g/kWh]
-% u_min = min(u_coal_unit)*ones(1,dx);
-% v_min = min(v_coal_unit)*ones(1,dx);
-% f_min = min(f_coal_unit)*ones(1,dx);
-% 
-% % ==============================
-% u1a = u_min;
-% v1a = v_min;
-% f1a = f_min;
-% u2a = u_coal_unit;
-% v2a = v_coal_unit;
-% f2a = f_coal_unit;
-% ua = u1a + u2a;
-% va = v1a + v2a;
-% fa = f1a + f2a;
-% 
-% u1b = u_coal_unit;
-% v1b = v_coal_unit;
-% f1b = f_coal_unit;
-% u2b = u_coal_unit;
-% v2b = v_coal_unit;
-% f2b = f_coal_unit;
-% ub = u1b + u2b;
-% vb = v1b + v2b;
-% fb = f1b + f2b;
-% 
-% figure(2); clf; hold on; box on;
-% plot(va, fa, 'linewidth', 1);
-% plot(vb, fb, 'linewidth', 1);
-% xlabel('Output power (in-house use excluded)');
-% ylabel('Coal Consumption (ton/h)');
-% legend('u1@minumum; u2 increases', 'u1 & u2 increase equally');
-% set(legend, 'location', 'northwest');
-% 
-% % ==============================
-% u1a_extended = interp1(va, u1a, vb);
-% u2a_extended = interp1(va, u2a, vb);
-% v1a_extended = interp1(va, v1a, vb);
-% v2a_extended = interp1(va, v2a, vb);
-% fa_extended = interp1(va, fa, vb);
-% f = [fa_extended; fb];
-% [value, id_row] = min(f);
-% 
-% id_col = 1:length(id_row);
-% id = sub2ind([2,dx], id_row, id_col);
-% 
-% u1 = [u1a_extended; u1b];
-% u2 = [u2a_extended; u2b];
-% v1 = [v1a_extended; v1b];
-% v2 = [v2a_extended; v2b];
-% opt_f = value;
-% opt_u1 = u1(id);
-% opt_u2 = u2(id);
-% opt_v1 = v1(id);
-% opt_v2 = v2(id);
-% v_unique = vb;
-% 
-% % save('TwoUnitsClean', ...
-% %      'v_unique', 'opt_f', ...
-% %      'opt_u1', 'opt_u2', ...
-% %      'opt_v1', 'opt_v2', ...
-% %      'dx');
-% 
-% % ==========
-% figure(21); clf;
-% subplot(3,1,1);
-% plot(vb, opt_u1); hold on;
-% ylim([0 700]);
-% ylabel('u1');
-% 
-% subplot(3,1,2);
-% plot(vb, opt_u2); hold on;
-% ylim([0 700]);
-% ylabel('u2');
-% 
-% subplot(3,1,3);
-% ha = area(vb, [opt_u1; opt_u2]');
-% set(ha(1), 'facec', [0.8 0.95 1], 'edgecolor', 'none');
-% set(ha(2), 'facec', [1 0.8 0.8], 'edgecolor', 'none');
-% legend('u1', 'u2');
-% set(legend, 'location', 'northwest');
-
-
-%% Three units;
-dx = 2000; % 0.115979 sec
+dx = 1000; % 0.115275 sec
 u_coal_unit = linspace(0.4,1,dx) * coal_nameplate;
 v_coal_unit = u_coal_unit-0.08*coal_nameplate;
 f_coal_unit = (266*linspace(0.4,1,dx).^2 -507*linspace(0.4,1,dx) + 542).*linspace(0.4,1,dx)*coal_nameplate/1e3; %[g/kWh]
@@ -122,120 +35,207 @@ f_min = min(f_coal_unit)*ones(1,dx);
 u1a = u_min;
 v1a = v_min;
 f1a = f_min;
-u2a = u_min;
-v2a = v_min;
-f2a = f_min;
-u3a = u_coal_unit;
-v3a = v_coal_unit;
-f3a = f_coal_unit;
-ua = u1a + u2a + u3a;
-va = v1a + v2a + v3a;
-fa = f1a + f2a + f3a;
+u2a = u_coal_unit;
+v2a = v_coal_unit;
+f2a = f_coal_unit;
+ua = u1a + u2a;
+va = v1a + v2a;
+fa = f1a + f2a;
 
-u1b = u_min;
-v1b = v_min;
-f1b = f_min;
+u1b = u_coal_unit;
+v1b = v_coal_unit;
+f1b = f_coal_unit;
 u2b = u_coal_unit;
 v2b = v_coal_unit;
 f2b = f_coal_unit;
-u3b = u_coal_unit;
-v3b = v_coal_unit;
-f3b = f_coal_unit;
-ub = u1b + u2b + u3b;
-vb = v1b + v2b + v3b;
-fb = f1b + f2b + f3b;
+ub = u1b + u2b;
+vb = v1b + v2b;
+fb = f1b + f2b;
 
-u1c = u_coal_unit;
-v1c = v_coal_unit;
-f1c = f_coal_unit;
-u2c = u_coal_unit;
-v2c = v_coal_unit;
-f2c = f_coal_unit;
-u3c = u_coal_unit;
-v3c = v_coal_unit;
-f3c = f_coal_unit;
-uc = u1c + u2c + u3c;
-vc = v1c + v2c + v3c;
-fc = f1c + f2c + f3c;
-
-figure(3); clf; hold on; box on;
+figure(2); clf; hold on; box on;
 plot(va, fa, 'linewidth', 1);
 plot(vb, fb, 'linewidth', 1);
-plot(vc, fc, 'linewidth', 1);
 xlabel('Output power (in-house use excluded)');
 ylabel('Coal Consumption (ton/h)');
-legend('2 plant2 @ minumum; 1 plants increase equally', '1 plant @ minumum; 2 plants increase equally', 'all three plants increase equally');
+legend('u1@minumum; u2 increases', 'u1 & u2 increase equally');
 set(legend, 'location', 'northwest');
 
 % ==============================
-u1a_extended = interp1(va, u1a, vc);
-u2a_extended = interp1(va, u2a, vc);
-u3a_extended = interp1(va, u3a, vc);
-v1a_extended = interp1(va, v1a, vc);
-v2a_extended = interp1(va, v2a, vc);
-v3a_extended = interp1(va, v3a, vc);
-fa_extended = interp1(va, fa, vc);
-
-u1b_extended = interp1(vb, u1b, vc);
-u2b_extended = interp1(vb, u2b, vc);
-u3b_extended = interp1(vb, u3b, vc);
-v1b_extended = interp1(vb, v1b, vc);
-v2b_extended = interp1(vb, v2b, vc);
-v3b_extended = interp1(vb, v3b, vc);
-fb_extended = interp1(vb, fb, vc);
-
-f = [fa_extended; fb_extended; fc];
+u1a_extended = interp1(va, u1a, vb);
+u2a_extended = interp1(va, u2a, vb);
+v1a_extended = interp1(va, v1a, vb);
+v2a_extended = interp1(va, v2a, vb);
+fa_extended = interp1(va, fa, vb);
+f = [fa_extended; fb];
 [value, id_row] = min(f);
 
 id_col = 1:length(id_row);
-id = sub2ind([3,dx], id_row, id_col);
+id = sub2ind([2,dx], id_row, id_col);
 
-u1 = [u1a_extended; u1b_extended; u1c];
-u2 = [u2a_extended; u2b_extended; u2c];
-u3 = [u3a_extended; u3b_extended; u3c];
-v1 = [v1a_extended; v1b_extended; v1c];
-v2 = [v2a_extended; v2b_extended; v2c];
-v3 = [v3a_extended; v3b_extended; v3c];
+u1 = [u1a_extended; u1b];
+u2 = [u2a_extended; u2b];
+v1 = [v1a_extended; v1b];
+v2 = [v2a_extended; v2b];
 opt_f = value;
 opt_u1 = u1(id);
 opt_u2 = u2(id);
-opt_u3 = u3(id);
 opt_v1 = v1(id);
 opt_v2 = v2(id);
-opt_v3 = v3(id);
+v_unique = vb;
 
-v_unique = vc;
-
-% save('ThreeUnitsClean', ...
+% save('TwoUnitsClean', ...
 %      'v_unique', 'opt_f', ...
-%      'opt_u1', 'opt_u2', 'opt_u3', ...
-%      'opt_v1', 'opt_v2', 'opt_v3', ...
+%      'opt_u1', 'opt_u2', ...
+%      'opt_v1', 'opt_v2', ...
 %      'dx');
 
 % ==========
-figure(31); clf;
-subplot(4,1,1);
-plot(vc, opt_u1, 'linewidth', 1); hold on;
+figure(21); clf;
+subplot(3,1,1);
+plot(vb, opt_u1); hold on;
 ylim([0 700]);
 ylabel('u1');
 
-subplot(4,1,2);
-plot(vc, opt_u2, 'linewidth', 1); hold on;
+subplot(3,1,2);
+plot(vb, opt_u2); hold on;
 ylim([0 700]);
 ylabel('u2');
 
-subplot(4,1,3);
-plot(vc, opt_u3, 'linewidth', 1); hold on;
-ylim([0 700]);
-ylabel('u3');
-
-subplot(4,1,4);
-ha = area(vc, [opt_u1; opt_u2; opt_u3]', 'edgecolor', 'none');
+subplot(3,1,3);
+ha = area(vb, [opt_u1; opt_u2]');
 set(ha(1), 'facec', [0.8 0.95 1], 'edgecolor', 'none');
 set(ha(2), 'facec', [1 0.8 0.8], 'edgecolor', 'none');
-set(ha(3), 'facec', [1 0.8 0], 'edgecolor', 'none');
-legend('u1', 'u2', 'u3');
+legend('u1', 'u2');
 set(legend, 'location', 'northwest');
+
+
+%% Three units;
+% dx = 2000; % 0.115979 sec
+% u_coal_unit = linspace(0.4,1,dx) * coal_nameplate;
+% v_coal_unit = u_coal_unit-0.08*coal_nameplate;
+% f_coal_unit = (266*linspace(0.4,1,dx).^2 -507*linspace(0.4,1,dx) + 542).*linspace(0.4,1,dx)*coal_nameplate/1e3; %[g/kWh]
+% u_min = min(u_coal_unit)*ones(1,dx);
+% v_min = min(v_coal_unit)*ones(1,dx);
+% f_min = min(f_coal_unit)*ones(1,dx);
+% 
+% % ==============================
+% u1a = u_min;
+% v1a = v_min;
+% f1a = f_min;
+% u2a = u_min;
+% v2a = v_min;
+% f2a = f_min;
+% u3a = u_coal_unit;
+% v3a = v_coal_unit;
+% f3a = f_coal_unit;
+% ua = u1a + u2a + u3a;
+% va = v1a + v2a + v3a;
+% fa = f1a + f2a + f3a;
+% 
+% u1b = u_min;
+% v1b = v_min;
+% f1b = f_min;
+% u2b = u_coal_unit;
+% v2b = v_coal_unit;
+% f2b = f_coal_unit;
+% u3b = u_coal_unit;
+% v3b = v_coal_unit;
+% f3b = f_coal_unit;
+% ub = u1b + u2b + u3b;
+% vb = v1b + v2b + v3b;
+% fb = f1b + f2b + f3b;
+% 
+% u1c = u_coal_unit;
+% v1c = v_coal_unit;
+% f1c = f_coal_unit;
+% u2c = u_coal_unit;
+% v2c = v_coal_unit;
+% f2c = f_coal_unit;
+% u3c = u_coal_unit;
+% v3c = v_coal_unit;
+% f3c = f_coal_unit;
+% uc = u1c + u2c + u3c;
+% vc = v1c + v2c + v3c;
+% fc = f1c + f2c + f3c;
+% 
+% figure(3); clf; hold on; box on;
+% plot(va, fa, 'linewidth', 1);
+% plot(vb, fb, 'linewidth', 1);
+% plot(vc, fc, 'linewidth', 1);
+% xlabel('Output power (in-house use excluded)');
+% ylabel('Coal Consumption (ton/h)');
+% legend('2 plant2 @ minumum; 1 plants increase equally', '1 plant @ minumum; 2 plants increase equally', 'all three plants increase equally');
+% set(legend, 'location', 'northwest');
+% 
+% % ==============================
+% u1a_extended = interp1(va, u1a, vc);
+% u2a_extended = interp1(va, u2a, vc);
+% u3a_extended = interp1(va, u3a, vc);
+% v1a_extended = interp1(va, v1a, vc);
+% v2a_extended = interp1(va, v2a, vc);
+% v3a_extended = interp1(va, v3a, vc);
+% fa_extended = interp1(va, fa, vc);
+% 
+% u1b_extended = interp1(vb, u1b, vc);
+% u2b_extended = interp1(vb, u2b, vc);
+% u3b_extended = interp1(vb, u3b, vc);
+% v1b_extended = interp1(vb, v1b, vc);
+% v2b_extended = interp1(vb, v2b, vc);
+% v3b_extended = interp1(vb, v3b, vc);
+% fb_extended = interp1(vb, fb, vc);
+% 
+% f = [fa_extended; fb_extended; fc];
+% [value, id_row] = min(f);
+% 
+% id_col = 1:length(id_row);
+% id = sub2ind([3,dx], id_row, id_col);
+% 
+% u1 = [u1a_extended; u1b_extended; u1c];
+% u2 = [u2a_extended; u2b_extended; u2c];
+% u3 = [u3a_extended; u3b_extended; u3c];
+% v1 = [v1a_extended; v1b_extended; v1c];
+% v2 = [v2a_extended; v2b_extended; v2c];
+% v3 = [v3a_extended; v3b_extended; v3c];
+% opt_f = value;
+% opt_u1 = u1(id);
+% opt_u2 = u2(id);
+% opt_u3 = u3(id);
+% opt_v1 = v1(id);
+% opt_v2 = v2(id);
+% opt_v3 = v3(id);
+% 
+% v_unique = vc;
+% 
+% % save('ThreeUnitsClean', ...
+% %      'v_unique', 'opt_f', ...
+% %      'opt_u1', 'opt_u2', 'opt_u3', ...
+% %      'opt_v1', 'opt_v2', 'opt_v3', ...
+% %      'dx');
+% 
+% % ==========
+% figure(31); clf;
+% subplot(4,1,1);
+% plot(vc, opt_u1, 'linewidth', 1); hold on;
+% ylim([0 700]);
+% ylabel('u1');
+% 
+% subplot(4,1,2);
+% plot(vc, opt_u2, 'linewidth', 1); hold on;
+% ylim([0 700]);
+% ylabel('u2');
+% 
+% subplot(4,1,3);
+% plot(vc, opt_u3, 'linewidth', 1); hold on;
+% ylim([0 700]);
+% ylabel('u3');
+% 
+% subplot(4,1,4);
+% ha = area(vc, [opt_u1; opt_u2; opt_u3]', 'edgecolor', 'none');
+% set(ha(1), 'facec', [0.8 0.95 1], 'edgecolor', 'none');
+% set(ha(2), 'facec', [1 0.8 0.8], 'edgecolor', 'none');
+% set(ha(3), 'facec', [1 0.8 0], 'edgecolor', 'none');
+% legend('u1', 'u2', 'u3');
+% set(legend, 'location', 'northwest');
 
 
 %% Four units

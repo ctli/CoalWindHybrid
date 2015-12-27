@@ -39,25 +39,24 @@ coal_fuel_y = (coal_fuelrate_y*1000).*(coal_fuelrate_x*coal_nameplate)/1e6; % [g
 % fuel rate
 figure(1); clf; hold on;
 area([0.4 1]*coal_nameplate, [1 1]*392, 'facec', [0.85 0.98 1], 'edgecolor', 'none');
-plot(coal_fuel_x, coal_fuelrate_y, 'linewidth', 1);
+plot(coal_fuel_x, coal_fuelrate_y, 'linewidth', 1, 'color', [217 83 25]/255);
 xlim([-15 710]);
-ylim([298 392]);
-my_gridline([1 1 1]*0.85, 'front');
+ylim([296 392]);
+% my_gridline([1 1 1]*0.85, 'front');
 set(gca, 'layer', 'top');
 set(gca, 'fontsize', 9);
 xlabel('Output Power (MW)');
 ylabel('Coal Consumption Rate (g/kWh)', 'fontweight', 'bold', 'fontsize', 12);
 set(gcf, 'unit', 'inch', 'pos', [1.0    5.85    5.0000    3.7500]);
-set(gca, 'pos', [0.1300    0.115    0.7750    0.77]);
+set(gca, 'pos', [0.1300    0.115    0.73    0.77]);
 legend('Working Range', 'Fuel Rate');
-set(legend, 'pos', [0.4924    0.75    0.2890    0.0950]);
+set(legend, 'pos', [0.465    0.75    0.2890    0.0950]);
 text(0.4*coal_nameplate, mean(get(gca, 'ylim')), '40% of Nameplate Capacity     ', 'rotation', 90, 'horizontalalignment', 'center', 'color', [0.5 0.5 0.5], 'fontsize', 9);
 text(1.0*coal_nameplate, mean(get(gca, 'ylim')), '100% of Nameplate Capacity    ', 'rotation', 90, 'horizontalalignment', 'center', 'color', [0.5 0.5 0.5], 'fontsize', 9);
 
 ax_pos = get(gca, 'pos');
 x_lim = get(gca, 'xlim');
 y_lim = get(gca, 'ylim');
-y_tick = get(gca, 'ytick');
 
 ax2 = axes;
 set(ax2, 'pos', ax_pos);
@@ -65,14 +64,16 @@ set(ax2, 'color', 'none');
 set(ax2, 'fontsize', 9);
 x_ticklabel = 0:0.15:1.5;
 set(ax2, 'xaxislocation', 'top', 'xlim', x_lim, 'xtick', x_ticklabel*coal_nameplate, 'xticklabel', x_ticklabel);
-set(ax2, 'yaxislocation', 'right', 'ylim', y_lim, 'ytick', y_tick, 'yticklabel', []);
+set(ax2, 'yaxislocation', 'right', 'ylim', y_lim, 'ytick', (1000:500:11000)/21.8, 'yticklabel', 1000:500:11000);
 xlabel('Output Power (Normalized)', 'fontsize', 9);
+ylabel('Heat Rate (Btu/kWh)', 'fontweight', 'bold', 'fontsize', 12);
 
+%%
 % ==============================
 % fuel consumption
 figure(2); clf; hold on;
 area([0.4 1]*coal_nameplate, [1 1]*202, 'facec', [0.85 0.98 1], 'edgecolor', 'none');
-plot(coal_fuel_x, coal_fuel_y, 'linewidth', 1);
+plot(coal_fuel_x, coal_fuel_y, 'linewidth', 1, 'color', [217 83 25]/255);
 plot([coal_fuel_x(1),coal_fuel_x(end)],[coal_fuel_y(1),coal_fuel_y(end)], '--', 'color', [0.5 0.5 0.5]);
 ylim([98 202]);
 xlim([-15 710]);

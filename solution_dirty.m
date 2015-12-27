@@ -173,7 +173,7 @@ set(legend, 'location', 'northwest');
 
 
 %% ========================================================================
-plot_switch = 'off'; % on/off
+plot_switch = 'on'; % on/off
 switch plot_switch
     case 'on' % don't plot
 dx1 = 10; % very course grid for plotting

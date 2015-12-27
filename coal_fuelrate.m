@@ -50,8 +50,10 @@ xlim([0.25 1.25]);
 ylim([260 380]);
 xlabel('Output Power (Normalized)');
 ylabel('Coal Consumption Rate (g/kWh)');
-title('Fuel Rate of Typical Coal Plants ');
-set(gca, 'ygrid', 'on');
+title('Typical Coal Plants ');
+set(gca, 'pos', [0.1300    0.1115    0.72    0.8135]);
+box off;
+% set(gca, 'ygrid', 'on');
 
 legend('subcritical air cooling', ...
        'supercritical air cooling', ...
@@ -60,9 +62,12 @@ legend('subcritical air cooling', ...
        'supercritical water cooling', ...
        'ultra supper water cooling');
 
-% export_fig thermal_eff -r600 -painters;
+axis_pos = get(gca, 'pos');
+x_lim = get(gca, 'xlim');
+y_lim = get(gca, 'ylim');
+y_ticklabel = 260:20:380;
 
-% ==============================
+     
 % quadratic curve fit
 XX = 0.45:0.05:1.05;
 
@@ -106,6 +111,18 @@ plot(XX(id), YY2(id), 'x', 'color', color_code(2,:), 'markersize', 6, 'linewidth
 % YY6 = XX.^2*p6(1) + XX.*p6(2) + p6(3);
 % plot(XX, YY6, '--', 'color', color_code(6,:));
 % text(0.3, 320, ['Eq: y6 = ', num2str(p6(1), '%3.0f'), 'x^2 ' num2str(p6(2), '%3.0f'), 'x + ', num2str(p6(3), '%3.0f')], 'FontName', 'Calibri', 'fontsize', 12);
+
+ax2 = axes;
+set(ax2, 'color', 'none', ...
+         'pos', axis_pos, ...
+         'yaxislocation', 'right', ...
+         'ylim', y_lim, ...
+         'ytick', (6000:500:8000)/21.8, ...
+         'yticklabel', (6000:500:8000), ...
+         'xaxislocation', 'top', ...
+         'xlim', x_lim, ...
+         'xticklabel', []);
+ylabel(ax2, 'Heat Rate (Btu/kWh)');
 
 
 %% fuel consumption
@@ -194,7 +211,7 @@ ax1 = gca;
 
 y_fuel = 0:50:250;
 x_MW = interp1(coal_fuel_y, coal_fuel_x, y_fuel);
-heat_rate = y_fuel.*25./(x_MW*1e3)*1e6; % [ton/MWh]] -> [Btu/kWh]
+heat_rate = y_fuel.*(21.8)./(x_MW*1e3)*1e6; % [ton/MWh]] -> [Btu/kWh]; 1 tce = 27.778mmBT
 
 ax2 = axes('pos', get(ax1, 'pos'), ...
            'color', 'none', ...
