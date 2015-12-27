@@ -10,7 +10,7 @@ coal_nameplate = 660; % [MW]
 % dx = 200;
 % u_coal_unit = linspace(0.4,1,dx) * coal_nameplate;
 % v_coal_unit = u_coal_unit-0.08*coal_nameplate;
-% f_coal_unit = (266*linspace(0.4,1,dx).^2 -507*linspace(0.4,1,dx) + 542).*linspace(0.4,1,dx)*coal_nameplate/1e3; %[g/kWh]
+% f_coal_unit = (266*linspace(0.4,1,dx).^2 -507*linspace(0.4,1,dx) + 542).*linspace(0.4,1,dx)*coal_nameplate/1e3; % [ton/h]
 % 
 % v = v_coal_unit;
 % f = f_coal_unit;
@@ -26,7 +26,7 @@ coal_nameplate = 660; % [MW]
 dx = 1000; % 0.115275 sec
 u_coal_unit = linspace(0.4,1,dx) * coal_nameplate;
 v_coal_unit = u_coal_unit-0.08*coal_nameplate;
-f_coal_unit = (266*linspace(0.4,1,dx).^2 -507*linspace(0.4,1,dx) + 542).*linspace(0.4,1,dx)*coal_nameplate/1e3; %[g/kWh]
+f_coal_unit = (266*linspace(0.4,1,dx).^2 -507*linspace(0.4,1,dx) + 542).*linspace(0.4,1,dx)*coal_nameplate/1e3; % [ton/h]
 u_min = min(u_coal_unit)*ones(1,dx);
 v_min = min(v_coal_unit)*ones(1,dx);
 f_min = min(f_coal_unit)*ones(1,dx);
@@ -113,7 +113,7 @@ set(legend, 'location', 'northwest');
 % dx = 2000; % 0.115979 sec
 % u_coal_unit = linspace(0.4,1,dx) * coal_nameplate;
 % v_coal_unit = u_coal_unit-0.08*coal_nameplate;
-% f_coal_unit = (266*linspace(0.4,1,dx).^2 -507*linspace(0.4,1,dx) + 542).*linspace(0.4,1,dx)*coal_nameplate/1e3; %[g/kWh]
+% f_coal_unit = (266*linspace(0.4,1,dx).^2 -507*linspace(0.4,1,dx) + 542).*linspace(0.4,1,dx)*coal_nameplate/1e3; % [ton/h]
 % u_min = min(u_coal_unit)*ones(1,dx);
 % v_min = min(v_coal_unit)*ones(1,dx);
 % f_min = min(f_coal_unit)*ones(1,dx);
@@ -242,7 +242,7 @@ set(legend, 'location', 'northwest');
 % dx = 4000; % 0.132656 sec
 % u_coal_unit = linspace(0.4,1,dx) * coal_nameplate;
 % v_coal_unit = u_coal_unit-0.08*coal_nameplate;
-% f_coal_unit = (266*linspace(0.4,1,dx).^2 -507*linspace(0.4,1,dx) + 542).*linspace(0.4,1,dx)*coal_nameplate/1e3; %[g/kWh]
+% f_coal_unit = (266*linspace(0.4,1,dx).^2 -507*linspace(0.4,1,dx) + 542).*linspace(0.4,1,dx)*coal_nameplate/1e3; % [ton/h]
 % u_min = min(u_coal_unit)*ones(1,dx);
 % v_min = min(v_coal_unit)*ones(1,dx);
 % f_min = min(f_coal_unit)*ones(1,dx);
@@ -420,7 +420,7 @@ set(legend, 'location', 'northwest');
 % dx = 6000; % 0.138804 sec
 % u_coal_unit = linspace(0.4,1,dx) * coal_nameplate;
 % v_coal_unit = u_coal_unit-0.08*coal_nameplate;
-% f_coal_unit = (266*linspace(0.4,1,dx).^2 -507*linspace(0.4,1,dx) + 542).*linspace(0.4,1,dx)*coal_nameplate/1e3; %[g/kWh]
+% f_coal_unit = (266*linspace(0.4,1,dx).^2 -507*linspace(0.4,1,dx) + 542).*linspace(0.4,1,dx)*coal_nameplate/1e3; % [ton/h]
 % u_min = min(u_coal_unit)*ones(1,dx);
 % v_min = min(v_coal_unit)*ones(1,dx);
 % f_min = min(f_coal_unit)*ones(1,dx);
@@ -653,3 +653,4 @@ set(legend, 'location', 'northwest');
 % set(ha(5), 'facec', [0.5 1 0.5], 'edgecolor', 'none');
 % legend('u1', 'u2', 'u3', 'u4', 'u5');
 % set(legend, 'location', 'east');
+

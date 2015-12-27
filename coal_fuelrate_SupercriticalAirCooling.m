@@ -3,30 +3,6 @@ clear
 close all
 clc
 
-p_HVDC = 9000; % [MW] line capacity of HVDC line: 9GW
-
-yr_range = 1979:2009;
-
-subregion_name = 'Xilingol';
-lat = 43.9;
-lon = 116;
-color_code = [0 114 189]/255; % blue
-wst_yr = 8;
-bst_yr = 9;
-
-v_cutin = 3; % [m/s]
-v_cutout = 25; % [m/s]
-pwr_curve = [
-3	0.005993333
-4	0.041946667
-5	0.107866667
-6	0.203746667
-7	0.329586667
-8	0.503373333
-9	0.713106667
-10	0.92884
-10.61	1
-];
 
 %% supercritical air cooling
 coal_nameplate = 660; % [MW]
@@ -35,8 +11,8 @@ coal_fuelrate_y = 266*coal_fuelrate_x.^2 -507*coal_fuelrate_x + 542; %[g/kWh]
 coal_fuel_x  = coal_fuelrate_x*coal_nameplate; % [MW]
 coal_fuel_y = (coal_fuelrate_y*1000).*(coal_fuelrate_x*coal_nameplate)/1e6; % [g/h] -> [ton/h]
 
-% ==============================
-% fuel rate
+
+%% Fuel rate [g/kWh]
 figure(1); clf; hold on;
 area([0.4 1]*coal_nameplate, [1 1]*392, 'facec', [0.85 0.98 1], 'edgecolor', 'none');
 plot(coal_fuel_x, coal_fuelrate_y, 'linewidth', 1, 'color', [217 83 25]/255);
@@ -68,9 +44,8 @@ set(ax2, 'yaxislocation', 'right', 'ylim', y_lim, 'ytick', (1000:500:11000)/21.8
 xlabel('Output Power (Normalized)', 'fontsize', 9);
 ylabel('Heat Rate (Btu/kWh)', 'fontweight', 'bold', 'fontsize', 12);
 
-%%
-% ==============================
-% fuel consumption
+
+%% Fuel consumption [ton/h]
 figure(2); clf; hold on;
 area([0.4 1]*coal_nameplate, [1 1]*202, 'facec', [0.85 0.98 1], 'edgecolor', 'none');
 plot(coal_fuel_x, coal_fuel_y, 'linewidth', 1, 'color', [217 83 25]/255);
