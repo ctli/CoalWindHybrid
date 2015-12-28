@@ -1,13 +1,46 @@
-Elapsed time is 2.733785 seconds.
+Elapsed time is 4.252134 seconds.
 cost_startup =
-   5.3759e+06
+     0
 cost_base_vom =
    2.1176e+08
 cost_fuel =
-   1.2436e+09
+   1.2499e+09
 cost_ramp =
-   1.1873e+06
+   2.3686e+06
+====================
 cost_total =
-   1.4620e+09
-ans =
-   1.4619e+09
+   1.4640e+09
+diff_pctg =
+  -3.6648e-05
+====================
+pctg_startup =
+     0
+pctg_base_vom =
+    0.1446
+pctg_fuel =
+    0.8537
+pctg_ramp =
+    0.0016
+========================================
+Double check costs
+cost_startup =
+     0
+cost_base_vom =
+   211762352
+cost_fuel =
+   1.2497e+09
+cost_ramp =
+   2.3686e+06
+====================
+cost_total =
+  1.4638e+09
+====================
+pctg_startup =
+     0
+pctg_base_vom =
+    0.1447
+pctg_fuel =
+    0.8537
+pctg_ramp =
+    0.0016
+>> 

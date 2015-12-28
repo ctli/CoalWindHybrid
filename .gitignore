@@ -1,3 +1,5 @@
 *.asv
 ~$*.pptx
 ~$*.ppt
+*.tif
+*.tiff
