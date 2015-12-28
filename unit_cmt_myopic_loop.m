@@ -13,6 +13,7 @@ coal_num = 14;
 coal_price = 57; % i.e. 380 [RMB/tonne] = 57 [$/tonne] (1RMB = 0.15USD)
 coal_heatcontent = 21.8; % 5500 [kcal/kg] = 21.8 [mmBtu/tonne] (1kcal = 3.96567 Btu)
 
+% ==========
 % US:
 startup = 38; % hot startup cost [$/MW]
 startup_oth = 5.81; % other hot startup cost [$/MW]
@@ -27,17 +28,17 @@ coal_startup_cost = coal_startup + coal_startup_fuel; % 4.6344e+04 [$]
 coal_loadfollow = 1.72; % load following cost [$/MW]
 coal_baseload = 3.22; % Baseload variable cost [$/MWh]
 
-
-%% Myopic unit commitment
-load  MyopicDispatch;
-
-
-%% Wind power
+% ==============================
+% Wind power
 wind_file = 'Xilingol_2009';
 load(wind_file);
 
 wind_pwr_range = 0:500:5000; % [1x11]
 target_pwr_range = 2500:500:8500; % [1x13]
+
+
+%% Myopic unit commitment
+% load  MyopicDispatch;
 % 
 % table_coal_pwr_v   = zeros(length(wind_pwr_range), length(target_pwr_range));
 % table_coal_pwr_u   = zeros(length(wind_pwr_range), length(target_pwr_range));
@@ -52,48 +53,54 @@ target_pwr_range = 2500:500:8500; % [1x13]
 % 
 % tic;
 % for w = 1:length(wind_pwr_range)
-% wind_pwr = wind_pwr_range(w)*p;
+% wind_pwr = round(wind_pwr_range(w)*p)';
 % 
 % for tg = 1:length(target_pwr_range)
 % target_pwr = target_pwr_range(tg);
-% coal_pwr = target_pwr - wind_pwr; % Use coal to make up deficit
+% coal_pwr = target_pwr - wind_pwr;
 % coal_pwr(coal_pwr<0) = 0;
 % 
 % wind_curtail = (coal_pwr + wind_pwr) - target_pwr;
 % 
-% ====================
-% Myopic dispatch
+% % ====================
+% % Myopic dispatch
 % id_dispatch = zeros(1, length(coal_pwr));
 % for t = 1:length(coal_pwr)
 %     id_dispatch(t) = find(v_range>=coal_pwr(t), 1, 'first');
 % end
-% f_dispatch = f_myopic(id_dispatch); % [ton/h]
 % cmt_dispatch = cmt_myopic(id_dispatch);
+% f_dispatch = f_myopic(id_dispatch); % [ton/h]
 % v_dispatch = v_myopic(:,id_dispatch);
 % u_dispatch = u_myopic(:,id_dispatch);
 % 
 % % ====================
 % % Check ramping
-% d_coal_pwr = diff(u_dispatch'); % [8759]x[14]
+% d_coal_pwr = [zeros(1,coal_num); diff(u_dispatch')]'; % [14]x[8760]
 % d_coal_pctg = d_coal_pwr/coal_nameplate;
 % 
 % % Check changes in commitment
-% d_cmt = diff(cmt_dispatch);
-% cmt_c = d_cmt(d_cmt>0); % Committed
-% cmt_d = d_cmt(d_cmt<0); % Decommitted
+% d_cmt = [0, diff(cmt_dispatch)];
+% cmt_c = zeros(1, length(coal_pwr)); % Commition
+% cmt_c(d_cmt>0) = d_cmt(d_cmt>0);
+% cmt_d = zeros(1, length(coal_pwr)); % Decommition
+% cmt_d(d_cmt<0) = d_cmt(d_cmt<0);
 % 
 % % ====================
 % % Costs
-% cost_startup = sum(cmt_c * coal_startup_cost); % [$]
-% cost_base_vom = sum(coal_pwr * coal_baseload); % [$]
-% cost_fuel = sum(f_dispatch * coal_price); % [$]
+% opt_cost_startup = cmt_c * coal_startup_cost;
+% opt_cost_base_vom = coal_pwr * coal_baseload;
+% opt_cost_fuel = f_dispatch * coal_price;
 % 
 % x = abs(d_coal_pctg);
 % y = (x-0.3)*6.5/0.7+1.5;
-% ramp_scale = zeros(size(x));
+% ramp_scale = ones(size(x)); % Exceeding 30 precent nameplate ramping is scaled by 1.5-8 times
 % ramp_scale(x>0.3) = y(x>0.3);
-% cost_ramp = sum(abs(d_coal_pwr(:)).*ramp_scale(:) * coal_loadfollow); % [$]
+% opt_cost_ramp = abs(d_coal_pwr(:)).*ramp_scale(:) * coal_loadfollow;
 % 
+% cost_startup = sum(opt_cost_startup);
+% cost_base_vom = sum(opt_cost_base_vom);
+% cost_fuel = sum(opt_cost_fuel);
+% cost_ramp = sum(opt_cost_ramp);
 % cost_total = cost_startup + cost_base_vom + cost_fuel + cost_ramp;
 % 
 % % ====================
@@ -112,23 +119,18 @@ target_pwr_range = 2500:500:8500; % [1x13]
 % toc;
 % end
 % end
-% 
-% pctg_startup = table_cost_startup./table_cost_total;
-% pctg_base_vom = table_cost_base_vom./table_cost_total;
-% pctg_fuel = table_cost_fuel./table_cost_total;
-% pctg_ramp = cost_ramp./table_cost_total;
-% 
+
 % save(['Myopic_', wind_file], ...
 %      'table_coal_pwr_v', 'table_coal_pwr_u', ...
 %      'table_wind_pwr', 'table_wind_curtail', ...
 %      'table_cost_startup', 'table_cost_base_vom', 'table_cost_fuel', 'table_cost_ramp', 'table_cost_total');
 
 load(['Myopic_', wind_file]);
+
 pctg_startup = table_cost_startup./table_cost_total;
 pctg_base_vom = table_cost_base_vom./table_cost_total;
 pctg_fuel = table_cost_fuel./table_cost_total;
 pctg_ramp = table_cost_ramp./table_cost_total;
-
 pctg_wind_curtail = table_wind_curtail./(table_wind_pwr + table_wind_curtail);
 
 
@@ -139,7 +141,8 @@ xlabel('Wind Capacity (MW)');
 ylabel('Target Output (MW)');
 zlabel('Total Generation Cost (Billion USD)');
 ylim([2000 10000]);
-view(30, 15);
+zlim([0 1.8]);
+view(35, 10);
 
 % ====================
 figure(11); clf;
@@ -160,6 +163,7 @@ xlabel('Target Output (MW)');
 title('Countour: Total Generation Cost (Billion USD)');
 set(gca, 'ytick', 0:1000:5000);
 grid on;
+
 
 %% Share of fuel cost
 figure(2); clf;
@@ -190,6 +194,7 @@ xlabel('Target Output (MW)');
 title('Countour: Share of Fuel Cost (-)');
 set(gca, 'ytick', 0:1000:5000);
 grid on;
+
 
 %% Wind curtailment
 figure(3); clf;

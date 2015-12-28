@@ -7,7 +7,7 @@ coal_nameplate = 660; % [MW]
 coal_useable = coal_nameplate*0.92; % 607.2 [MW]
 coal_num = 14;
 
-% ====================
+% ==============================
 % Costs of coal power plants
 % China:
 coal_price = 57; % i.e. 380 [RMB/tonne] = 57 [$/tonne] (1RMB = 0.15USD)
@@ -28,7 +28,7 @@ coal_startup_cost = coal_startup + coal_startup_fuel; % 4.6344e+04 [$]
 coal_loadfollow = 1.72; % load following cost [$/MW]
 coal_baseload = 3.22; % Baseload variable cost [$/MWh]
 
-% ====================
+% ==============================
 % Wind power
 wind_file = 'Xilingol_2009';
 load(wind_file);
@@ -106,8 +106,7 @@ toc;
 
 %% ========================================================================
 % Check ramping
-d_coal_pwr = [zeros(1,coal_num);
-              diff(u_dispatch')]'; % [14]x[8760]
+d_coal_pwr = [zeros(1,coal_num); diff(u_dispatch')]'; % [14]x[8760]
 d_coal_pctg = d_coal_pwr/coal_nameplate;
 
 % Check changes in commitment
