@@ -7,8 +7,7 @@ coal_nameplate = 660; % [MW]
 
 coal_num = 14; % 3 units
 
-% dx = 10000;
-dx = 1000;
+dx = 10000;
 u_coal_unit = linspace(0.4,1,dx) * coal_nameplate;
 v_coal_unit = u_coal_unit-0.08*coal_nameplate;
 f_coal_unit = (266*linspace(0.4,1,dx).^2 -507*linspace(0.4,1,dx) + 542).*linspace(0.4,1,dx)*coal_nameplate/1e3; % [ton/h]
@@ -19,8 +18,7 @@ f_min = min(f_coal_unit);
 
 %% ========================================================================
 % 211.2~8500.8MW -> round to 220-8500MW
-% v_range = 220:0.1:8500; % [1x82801]
-v_range = 220:20:8500; % [1x415]
+v_range = 220:0.1:8500; % [1x82801]
 u_table = zeros(coal_num, length(v_range), coal_num); % [14 units]x[pwr range]x[cmt]
 v_table = zeros(coal_num, length(v_range), coal_num);
 f_table = zeros(length(v_range), coal_num);
@@ -121,7 +119,7 @@ my_gridline;
 
 % v_st = v_range(id_st);
 % v_ed = v_range(id_ed);
-% save('OptTable', ...
+% save('FourteenUnits', ...
 %      'v_range', ...
 %      'f_table', 'u_table', 'v_table', ...
 %      'id_st', 'id_ed', 'v_st', 'v_ed');

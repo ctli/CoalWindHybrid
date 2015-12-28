@@ -9,7 +9,7 @@ coal_num = 14;
 
 
 %% Myopic unit commitment
-% load OptTable;
+% load FourteenUnits;
 % 
 % f_myopic = zeros(1,length(v_range));
 % cmt_myopic = zeros(1,length(v_range));
@@ -58,12 +58,15 @@ load  MyopicDispatch;
 
 
 %% Wind power
-load Xilingol_2009;
+wind_file = 'Xilingol_2009';
+load(wind_file);
 wind_pwr = p*2500;
-d_wind_pwr = diff(p);
 
 target_pwr = 8500;
 coal_pwr = target_pwr - wind_pwr; % Use coal to make up deficit
+coal_pwr(coal_pwr<0) = 0;
+
+wind_curtail = (coal_pwr + wind_pwr) - target_pwr;
 
 
 %% Myopic dispatch
@@ -78,6 +81,8 @@ v_dispatch = v_myopic(:,id_dispatch);
 u_dispatch = u_myopic(:,id_dispatch);
 toc;
 
+
+%% ========================================================================
 % Check ramping
 d_coal_pwr = diff(u_dispatch'); % [8759]x[14]
 d_coal_pctg = d_coal_pwr/coal_nameplate;
@@ -196,7 +201,7 @@ x = abs(d_coal_pctg);
 y = (x-0.3)*6.5/0.7+1.5;
 ramp_scale = zeros(size(x)); % Exceeding 30 precent nameplate ramping is scaled by 1.5-8 times
 ramp_scale(x>0.3) = y(x>0.3);
-cost_ramp = sum(abs(d_coal_pwr(:)).*ramp_scale(:) * coal_loadfollow)
+cost_ramp = sum(abs(d_coal_pwr(:)).*ramp_scale(:) * coal_loadfollow) % [$]
 
 disp('====================');
 cost_total = cost_startup + cost_base_vom + cost_fuel + cost_ramp
@@ -207,5 +212,9 @@ pctg_base_vom = cost_base_vom/cost_total
 pctg_fuel = cost_fuel/cost_total
 pctg_ramp = cost_ramp/cost_total
 
+% save(['Myopic_', wind_file, '_nominal'], ...
+%      'id_dispatch', 'v_dispatch', 'u_dispatch', ...
+%      'wind_pwr', 'wind_curtail', ...
+%      'cost_startup', 'cost_base_vom', 'cost_fuel', 'cost_ramp', 'cost_total');
 
 
