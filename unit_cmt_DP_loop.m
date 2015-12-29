@@ -39,137 +39,136 @@ target_pwr_range = 2500:500:8500; % [1x13]
 
 
 %% Horizon-based unit commitment
-load FourteenUnits; % 'v_range', 'f_table', 'u_table', 'v_table', 'id_st', 'id_ed', 'v_st', 'v_ed'
+% load FourteenUnits; % 'v_range', 'f_table', 'u_table', 'v_table', 'id_st', 'id_ed', 'v_st', 'v_ed'
+% 
+% table_coal_pwr_v   = zeros(length(wind_pwr_range), length(target_pwr_range));
+% table_coal_pwr_u   = zeros(length(wind_pwr_range), length(target_pwr_range));
+% table_wind_pwr     = zeros(length(wind_pwr_range), length(target_pwr_range));
+% table_wind_curtail = zeros(length(wind_pwr_range), length(target_pwr_range));
+% 
+% table_cost_total    = zeros(length(wind_pwr_range), length(target_pwr_range));
+% table_cost_fuel     = zeros(length(wind_pwr_range), length(target_pwr_range));
+% table_cost_startup  = zeros(length(wind_pwr_range), length(target_pwr_range));
+% table_cost_base_vom = zeros(length(wind_pwr_range), length(target_pwr_range));
+% table_cost_ramp     = zeros(length(wind_pwr_range), length(target_pwr_range));
+% 
+% tic;
+% for w = 1:length(wind_pwr_range)
+% wind_pwr = round(wind_pwr_range(w)*p)';
+% 
+% for tg = 1:length(target_pwr_range)
+%     tg
+% target_pwr = target_pwr_range(tg);
+% coal_pwr = target_pwr - wind_pwr;
+% coal_pwr(coal_pwr<0) = 0;
+% 
+% wind_curtail = (coal_pwr + wind_pwr) - target_pwr;
+% 
+% % ====================
+% % DP calculation
+% N = length(coal_pwr);
+% 
+% % One state: number of coal plants commited
+% J_star       = -1*ones(1, length(coal_pwr)); % Cummulative cost
+% cmt_dispatch = -1*ones(1, length(coal_pwr)); % Optimal commitment
+% f_dispatch   = -1*ones(1, length(coal_pwr));
+% u_dispatch   = -1*ones(coal_num, length(coal_pwr));
+% v_dispatch   = -1*ones(coal_num, length(coal_pwr));
+% 
+% opt_cost_startup  = -1*ones(1, length(coal_pwr));
+% opt_cost_base_vom = -1*ones(1, length(coal_pwr));
+% opt_cost_fuel     = -1*ones(1, length(coal_pwr));
+% opt_cost_ramp     = -1*ones(1, length(coal_pwr));
+% 
+% id_dispatch = zeros(1, length(coal_pwr));
+% 
+% t = N;
+% id_dispatch(t) = find(v_range>=coal_pwr(t), 1, 'first');
+% f_extract = f_table(id_dispatch(t),:);
+% cost_fuel_tmp = f_extract * coal_price;
+% cost_base_vom_tmp = coal_pwr(t) * coal_baseload;
+% J_tmp = cost_fuel_tmp + cost_base_vom_tmp;
+% [value, id_opt] = min(J_tmp);
+% J_star(t) = value;
+% cmt_dispatch(t) = id_opt;
+% f_dispatch(t) = f_extract(id_opt);
+% u_dispatch(:,t) = u_table(:,id_dispatch(t),cmt_dispatch(t));
+% v_dispatch(:,t) = v_table(:,id_dispatch(t),cmt_dispatch(t));
+% opt_cost_startup(t) = 0;
+% opt_cost_base_vom(t) = cost_base_vom_tmp;
+% opt_cost_fuel(t) = cost_fuel_tmp(id_opt);
+% opt_cost_ramp(t) = 0;
+% 
+% for t = N-1:-1:1
+%     id_dispatch(t) = find(v_range>=coal_pwr(t), 1, 'first');
+%     f_extract = f_table(id_dispatch(t),:);
+%     cost_fuel_tmp = f_extract * coal_price;
+%     cost_base_vom_tmp = coal_pwr(t) * coal_baseload;
+%     
+%     cost_startup_tmp = zeros(1, coal_num);
+%     cost_ramp_tmp = zeros(1, coal_num);
+%     for cmt = 1:coal_num
+%         u_tmp = u_table(:,id_dispatch(t),cmt);
+%         v_tmp = v_table(:,id_dispatch(t),cmt);
+%         
+%         c = cmt_dispatch(t+1) - cmt;
+%         if c>0
+%             cost_startup_tmp(cmt) = c*coal_startup_cost;
+%         else
+%             cost_startup_tmp(cmt) = 0;
+%         end
+%         
+%         d_coal_pwr = u_tmp - u_dispatch(:,t+1);
+%         d_coal_pctg = d_coal_pwr/coal_nameplate;
+%         x = abs(d_coal_pctg);
+%         y = (x-0.3)*6.5/0.7+1.5;
+%         ramp_scale = ones(size(x));
+%         ramp_scale(x>0.3) = y(x>0.3);
+%         cost_ramp_tmp(cmt) = sum(abs(d_coal_pwr(:)).*ramp_scale(:) * coal_loadfollow);
+%     end
+%     J_tmp = J_star(t+1) + cost_fuel_tmp + cost_base_vom_tmp + cost_startup_tmp + cost_ramp_tmp;
+%     
+%     [value, id_opt] = min(J_tmp);
+%     J_star(t) = value;
+%     cmt_dispatch(t) = id_opt;
+%     f_dispatch(t) = f_table(id_dispatch(t), id_opt);
+%     u_dispatch(:,t) = u_table(:,id_dispatch(t),cmt_dispatch(t));
+%     v_dispatch(:,t) = v_table(:,id_dispatch(t),cmt_dispatch(t));
+%     opt_cost_startup(t) = cost_startup_tmp(id_opt);
+%     opt_cost_base_vom(t) = cost_base_vom_tmp;
+%     opt_cost_fuel(t) = cost_fuel_tmp(id_opt);
+%     opt_cost_ramp(t) = cost_ramp_tmp(id_opt);
+% end
+% 
+% cost_startup = sum(opt_cost_startup);
+% cost_base_vom = sum(opt_cost_base_vom);
+% cost_fuel = sum(opt_cost_fuel);
+% cost_ramp = sum(opt_cost_ramp);
+% cost_total = cost_startup + cost_base_vom + cost_fuel + cost_ramp;
+% 
+% % ====================
+% table_coal_pwr_v(w,tg) = sum(v_dispatch(:));
+% table_coal_pwr_u(w,tg) = sum(u_dispatch(:));
+% 
+% table_wind_pwr(w,tg)     = sum(wind_pwr(:));
+% table_wind_curtail(w,tg) = sum(wind_curtail(:));
+% 
+% table_cost_startup(w,tg)  = cost_startup;
+% table_cost_base_vom(w,tg) = cost_base_vom;
+% table_cost_fuel(w,tg)     = cost_fuel;
+% table_cost_ramp(w,tg)     = cost_ramp;
+% table_cost_total(w,tg)    = cost_total;
+%     
+% toc;
+% end
+% end
 
-table_coal_pwr_v   = zeros(length(wind_pwr_range), length(target_pwr_range));
-table_coal_pwr_u   = zeros(length(wind_pwr_range), length(target_pwr_range));
-table_wind_pwr     = zeros(length(wind_pwr_range), length(target_pwr_range));
-table_wind_curtail = zeros(length(wind_pwr_range), length(target_pwr_range));
+% save(['DP_', wind_file], ...
+%      'table_coal_pwr_v', 'table_coal_pwr_u', ...
+%      'table_wind_pwr', 'table_wind_curtail', ...
+%      'table_cost_startup', 'table_cost_base_vom', 'table_cost_fuel', 'table_cost_ramp', 'table_cost_total');
 
-table_cost_total    = zeros(length(wind_pwr_range), length(target_pwr_range));
-table_cost_fuel     = zeros(length(wind_pwr_range), length(target_pwr_range));
-table_cost_startup  = zeros(length(wind_pwr_range), length(target_pwr_range));
-table_cost_base_vom = zeros(length(wind_pwr_range), length(target_pwr_range));
-table_cost_ramp     = zeros(length(wind_pwr_range), length(target_pwr_range));
-
-
-tic;
-for w = 1:length(wind_pwr_range)
-wind_pwr = round(wind_pwr_range(w)*p)';
-
-for tg = 1:length(target_pwr_range)
-    tg
-target_pwr = target_pwr_range(tg);
-coal_pwr = target_pwr - wind_pwr;
-coal_pwr(coal_pwr<0) = 0;
-
-wind_curtail = (coal_pwr + wind_pwr) - target_pwr;
-
-% ====================
-% DP calculation
-N = length(coal_pwr);
-
-% One state: number of coal plants commited
-J_star       = -1*ones(1, length(coal_pwr)); % Cummulative cost
-cmt_dispatch = -1*ones(1, length(coal_pwr)); % Optimal commitment
-f_dispatch   = -1*ones(1, length(coal_pwr));
-u_dispatch   = -1*ones(coal_num, length(coal_pwr));
-v_dispatch   = -1*ones(coal_num, length(coal_pwr));
-
-opt_cost_startup  = -1*ones(1, length(coal_pwr));
-opt_cost_base_vom = -1*ones(1, length(coal_pwr));
-opt_cost_fuel     = -1*ones(1, length(coal_pwr));
-opt_cost_ramp     = -1*ones(1, length(coal_pwr));
-
-id_dispatch = zeros(1, length(coal_pwr));
-
-t = N;
-id_dispatch(t) = find(v_range>=coal_pwr(t), 1, 'first');
-f_extract = f_table(id_dispatch(t),:);
-cost_fuel_tmp = f_extract * coal_price;
-cost_base_vom_tmp = coal_pwr(t) * coal_baseload;
-J_tmp = cost_fuel_tmp + cost_base_vom_tmp;
-[value, id_opt] = min(J_tmp);
-J_star(t) = value;
-cmt_dispatch(t) = id_opt;
-f_dispatch(t) = f_extract(id_opt);
-u_dispatch(:,t) = u_table(:,id_dispatch(t),cmt_dispatch(t));
-v_dispatch(:,t) = v_table(:,id_dispatch(t),cmt_dispatch(t));
-opt_cost_startup(t) = 0;
-opt_cost_base_vom(t) = cost_base_vom_tmp;
-opt_cost_fuel(t) = cost_fuel_tmp(id_opt);
-opt_cost_ramp(t) = 0;
-
-for t = N-1:-1:1
-    id_dispatch(t) = find(v_range>=coal_pwr(t), 1, 'first');
-    f_extract = f_table(id_dispatch(t),:);
-    cost_fuel_tmp = f_extract * coal_price;
-    cost_base_vom_tmp = coal_pwr(t) * coal_baseload;
-    
-    cost_startup_tmp = zeros(1, coal_num);
-    cost_ramp_tmp = zeros(1, coal_num);
-    for cmt = 1:coal_num
-        u_tmp = u_table(:,id_dispatch(t),cmt);
-        v_tmp = v_table(:,id_dispatch(t),cmt);
-        
-        c = cmt_dispatch(t+1) - cmt;
-        if c>0
-            cost_startup_tmp(cmt) = c*coal_startup_cost;
-        else
-            cost_startup_tmp(cmt) = 0;
-        end
-        
-        d_coal_pwr = u_tmp - u_dispatch(:,t+1);
-        d_coal_pctg = d_coal_pwr/coal_nameplate;
-        x = abs(d_coal_pctg);
-        y = (x-0.3)*6.5/0.7+1.5;
-        ramp_scale = ones(size(x));
-        ramp_scale(x>0.3) = y(x>0.3);
-        cost_ramp_tmp(cmt) = sum(abs(d_coal_pwr(:)).*ramp_scale(:) * coal_loadfollow);
-    end
-    J_tmp = J_star(t+1) + cost_fuel_tmp + cost_base_vom_tmp + cost_startup_tmp + cost_ramp_tmp;
-    
-    [value, id_opt] = min(J_tmp);
-    J_star(t) = value;
-    cmt_dispatch(t) = id_opt;
-    f_dispatch(t) = f_table(id_dispatch(t), id_opt);
-    u_dispatch(:,t) = u_table(:,id_dispatch(t),cmt_dispatch(t));
-    v_dispatch(:,t) = v_table(:,id_dispatch(t),cmt_dispatch(t));
-    opt_cost_startup(t) = cost_startup_tmp(id_opt);
-    opt_cost_base_vom(t) = cost_base_vom_tmp;
-    opt_cost_fuel(t) = cost_fuel_tmp(id_opt);
-    opt_cost_ramp(t) = cost_ramp_tmp(id_opt);
-end
-
-cost_startup = sum(opt_cost_startup);
-cost_base_vom = sum(opt_cost_base_vom);
-cost_fuel = sum(opt_cost_fuel);
-cost_ramp = sum(opt_cost_ramp);
-cost_total = cost_startup + cost_base_vom + cost_fuel + cost_ramp;
-
-% ====================
-table_coal_pwr_v(w,tg) = sum(v_dispatch(:));
-table_coal_pwr_u(w,tg) = sum(u_dispatch(:));
-
-table_wind_pwr(w,tg)     = sum(wind_pwr(:));
-table_wind_curtail(w,tg) = sum(wind_curtail(:));
-
-table_cost_startup(w,tg)  = cost_startup;
-table_cost_base_vom(w,tg) = cost_base_vom;
-table_cost_fuel(w,tg)     = cost_fuel;
-table_cost_ramp(w,tg)     = cost_ramp;
-table_cost_total(w,tg)    = cost_total;
-    
-toc;
-end
-end
-
-save(['DP_', wind_file], ...
-     'table_coal_pwr_v', 'table_coal_pwr_u', ...
-     'table_wind_pwr', 'table_wind_curtail', ...
-     'table_cost_startup', 'table_cost_base_vom', 'table_cost_fuel', 'table_cost_ramp', 'table_cost_total');
-
-% load(['DP_', wind_file]);
+load(['DP_', wind_file]);
 
 pctg_startup = table_cost_startup./table_cost_total;
 pctg_base_vom = table_cost_base_vom./table_cost_total;

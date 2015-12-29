@@ -32,12 +32,9 @@ coal_baseload = 3.22; % Baseload variable cost [$/MWh]
 % Wind power
 wind_file = 'Xilingol_2009';
 load(wind_file);
-wind_pwr = round(p*2500);
+wind_pwr = round(p*2500)';
 
 target_pwr = 8500;
-coal_pwr = target_pwr - wind_pwr; % Use coal to make up deficit
-
-wind_curtail = (coal_pwr + wind_pwr) - target_pwr;
 
 
 %% Myopic unit commitment
@@ -91,17 +88,41 @@ load  MyopicDispatch;
 
 %% Myopic dispatch
 tic;
-id_dispatch = zeros(1, length(coal_pwr));
-for t = 1:length(coal_pwr)
-    id_dispatch(t) = find(v_range>=coal_pwr(t), 1, 'first');
+
+% coal_pwr = target_pwr - wind_pwr; % Use coal to make up deficit
+% wind_curtail = (coal_pwr + wind_pwr) - target_pwr;
+
+wind_ratio = linspace(1,0,11);
+id_ratio = zeros(1, length(wind_pwr));
+id_dispatch = zeros(1, length(wind_pwr));
+wind_dispatch = zeros(1, length(wind_pwr));
+coal_dispatch = zeros(1, length(wind_pwr));
+for t = 1:length(wind_pwr)
+    wind_pwr_tmp = wind_pwr(t)*wind_ratio;
+    coal_pwr_tmp = target_pwr - wind_pwr_tmp;
+
+    id_tmp = zeros(1,length(wind_ratio));
+    f_tmp = zeros(1,length(wind_ratio));
+    for wr = 1:length(wind_ratio)
+        id_tmp(wr) = find(v_range>=coal_pwr_tmp(wr), 1, 'first');
+        f_tmp(wr) = f_myopic(id_tmp(wr));
+    end
+    cost_base_vom = coal_pwr_tmp*coal_baseload;
+    cost_fuel = f_tmp*coal_price;
+    [value, id_opt] = min(cost_base_vom + cost_fuel);
+    id_ratio(t) = id_opt;
+    id_dispatch(t) = id_tmp(id_opt);
+    wind_dispatch(t) = wind_pwr_tmp(id_opt);
+    coal_dispatch(t) = coal_pwr_tmp(id_opt);
 end
 cmt_dispatch = cmt_myopic(id_dispatch);
 f_dispatch = f_myopic(id_dispatch); % [ton/h]
 v_dispatch = v_myopic(:,id_dispatch);
 u_dispatch = u_myopic(:,id_dispatch);
+wind_curtail = wind_pwr - wind_dispatch;
 toc;
 
-% load(['Myopic_', wind_file, '_nominal']);
+% load(['Myopic_', wind_file, '_nominal_new']);
 
 
 %% ========================================================================
@@ -111,9 +132,9 @@ d_coal_pctg = d_coal_pwr/coal_nameplate;
 
 % Check changes in commitment
 d_cmt = [0, diff(cmt_dispatch)];
-cmt_c = zeros(1, length(coal_pwr)); % Commition
+cmt_c = zeros(1, length(wind_pwr)); % Commition
 cmt_c(d_cmt>0) = d_cmt(d_cmt>0);
-cmt_d = zeros(1, length(coal_pwr)); % Decommition
+cmt_d = zeros(1, length(wind_pwr)); % Decommition
 cmt_d(d_cmt<0) = d_cmt(d_cmt<0);
 
 % Commit or decommit 2 or more coal plants
@@ -122,7 +143,7 @@ id_jump = find(abs(d_cmt)>1) - 1;
 
 %% Costs
 opt_cost_startup = cmt_c * coal_startup_cost;
-opt_cost_base_vom = coal_pwr * coal_baseload;
+opt_cost_base_vom = coal_dispatch * coal_baseload;
 opt_cost_fuel = f_dispatch * coal_price;
 
 % opt_cost_ramp = abs(d_coal_pwr(:)) * coal_loadfollow;
@@ -146,20 +167,21 @@ pctg_base_vom = cost_base_vom/cost_total
 pctg_fuel = cost_fuel/cost_total
 pctg_ramp = cost_ramp/cost_total
 
-% save(['Myopic_', wind_file, '_nominal'], ...
-%      'id_dispatch', 'cmt_dispatch', 'f_dispatch', 'v_dispatch', 'u_dispatch', ...
-%      'wind_pwr', 'wind_curtail', ...
-%      'opt_cost_startup', 'opt_cost_base_vom', 'opt_cost_fuel', 'opt_cost_ramp', ...
-%      'cost_startup', 'cost_base_vom', 'cost_fuel', 'cost_ramp', 'cost_total');
+save(['Myopic_', wind_file, '_nominal'], ...
+     'id_dispatch', 'cmt_dispatch', 'f_dispatch', ...
+     'coal_dispatch', 'v_dispatch', 'u_dispatch', ...
+     'wind_dispatch', 'wind_pwr', 'wind_curtail', ...
+     'opt_cost_startup', 'opt_cost_base_vom', 'opt_cost_fuel', 'opt_cost_ramp', ...
+     'cost_startup', 'cost_base_vom', 'cost_fuel', 'cost_ramp', 'cost_total');
 
 
 %% ========================================================================
 plot_switch = 'off'; % on/off
 switch plot_switch
     case 'on'
-v_unique = zeros(1, length(coal_pwr));
-u_unique = zeros(1, length(coal_pwr));
-for t = 1:length(coal_pwr)
+v_unique = zeros(1, length(wind_pwr));
+u_unique = zeros(1, length(wind_pwr));
+for t = 1:length(wind_pwr)
     vt = v_dispatch(1:cmt_dispatch(t),t);
     if length(unique(vt))>1
         disp([num2str(t), ': output power not equally distributed']); % this will triger errors
@@ -182,9 +204,10 @@ set(gcf, 'units', 'inch', 'pos', [2.9792    1.4583    5.8333    6.75]);
 
 % ====================
 ax1 = subplot(4,1,1:2); hold on; box on;
-ha = area([coal_pwr, wind_pwr], 'edgecolor', 'none');
+ha = area([coal_dispatch; wind_dispatch; wind_curtail]', 'edgecolor', 'none');
 set(ha(1), 'facec', [1 0.7 0.7]);
 set(ha(2), 'facec', [0.6 1 0]);
+set(ha(3), 'facec', [0 0.7 0]);
 
 area(v_dispatch', 'facec', 'none', 'edgecolor', [1 1 1]);
 for i = 1:length(id_jump)
