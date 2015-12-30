@@ -92,36 +92,36 @@ id_range = 1:length(v_range);
 
 
 %% Myopic dispatch
-% id_ratio = zeros(1, length(wind_pwr));
-% id_dispatch = zeros(1, length(wind_pwr));
-% wind_dispatch = zeros(1, length(wind_pwr));
-% coal_dispatch = zeros(1, length(wind_pwr));
-% tic;
-% for t = 1:length(wind_pwr)
-%     wind_pwr_tmp = wind_pwr(t)*wind_ratio;
-%     coal_pwr_tmp = target_pwr - wind_pwr_tmp;
-%     coal_pwr_tmp(coal_pwr_tmp<coal_min) = coal_min;
-%     
-%     id_tmp = interp1(v_range, id_range, coal_pwr_tmp);
-%     id_tmp = ceil(id_tmp);
-%     f_tmp = interp1(id_range, f_myopic, id_tmp);
-%     
-%     cost_base_vom = coal_pwr_tmp*coal_baseload;
-%     cost_fuel = f_tmp*coal_price;
-%     [value, id_opt] = min(cost_base_vom + cost_fuel);
-%     id_ratio(t) = id_opt;
-%     id_dispatch(t) = id_tmp(id_opt);
-%     coal_dispatch(t) = coal_pwr_tmp(id_opt);
-%     wind_dispatch(t) = target_pwr - coal_dispatch(t);
-% end
-% cmt_dispatch = cmt_myopic(id_dispatch);
-% f_dispatch = f_myopic(id_dispatch); % [ton/h]
-% v_dispatch = v_myopic(:,id_dispatch);
-% u_dispatch = u_myopic(:,id_dispatch);
-% wind_curtail = wind_pwr - wind_dispatch;
-% toc;
+id_ratio = zeros(1, length(wind_pwr));
+id_dispatch = zeros(1, length(wind_pwr));
+wind_dispatch = zeros(1, length(wind_pwr));
+coal_dispatch = zeros(1, length(wind_pwr));
+tic;
+for t = 1:length(wind_pwr)
+    wind_pwr_tmp = wind_pwr(t)*wind_ratio;
+    coal_pwr_tmp = target_pwr - wind_pwr_tmp;
+    coal_pwr_tmp(coal_pwr_tmp<coal_min) = coal_min;
+    
+    id_tmp = interp1(v_range, id_range, coal_pwr_tmp);
+    id_tmp = ceil(id_tmp);
+    f_tmp = interp1(id_range, f_myopic, id_tmp);
+    
+    cost_base_vom = coal_pwr_tmp*coal_baseload;
+    cost_fuel = f_tmp*coal_price;
+    [value, id_opt] = min(cost_base_vom + cost_fuel);
+    id_ratio(t) = id_opt;
+    id_dispatch(t) = id_tmp(id_opt);
+    coal_dispatch(t) = coal_pwr_tmp(id_opt);
+    wind_dispatch(t) = target_pwr - coal_dispatch(t);
+end
+cmt_dispatch = cmt_myopic(id_dispatch);
+f_dispatch = f_myopic(id_dispatch); % [ton/h]
+v_dispatch = v_myopic(:,id_dispatch);
+u_dispatch = u_myopic(:,id_dispatch);
+wind_curtail = wind_pwr - wind_dispatch;
+toc;
 
-load(['Myopic_', wind_file, '_nominal']);
+% load(['Myopic_', wind_file, '_nominal']);
 
 
 %% ========================================================================
