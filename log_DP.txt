@@ -22,25 +22,25 @@ pctg_fuel =
 pctg_ramp =
     0.0016
 ========================================
-Double check costs
+========================================
+Elapsed time is 11.675342 seconds. (wind curtailment allowed)
 cost_startup =
      0
 cost_base_vom =
-   211762352
+   2.1176e+08
 cost_fuel =
-   1.2497e+09
+   1.2436e+09
 cost_ramp =
-   2.3686e+06
+   3.3130e+06
 ====================
 cost_total =
-  1.4638e+09
+   1.4587e+09
 ====================
 pctg_startup =
      0
 pctg_base_vom =
-    0.1447
+    0.1452
 pctg_fuel =
-    0.8537
+    0.8526
 pctg_ramp =
-    0.0016
->> 
+    0.0023

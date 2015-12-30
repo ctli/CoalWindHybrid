@@ -20,8 +20,8 @@ f_min = min(f_coal_unit);
 % 211.2~8500.8MW -> round to 220-8500MW
 v_range = 220:0.1:8500; % [1x82801]
 u_table = zeros(coal_num, length(v_range), coal_num); % [14 units]x[pwr range]x[cmt]
-v_table = zeros(coal_num, length(v_range), coal_num);
-f_table = zeros(length(v_range), coal_num);
+v_table = zeros(coal_num, length(v_range), coal_num); % [14 units]x[pwr range]x[cmt]
+f_table = zeros(length(v_range), coal_num); % [pwr range]x[cmt]
 id_st = zeros(coal_num, 1); % Starting entry that is not nan
 id_ed = zeros(coal_num, 1); % Ending entry that is not nan
 

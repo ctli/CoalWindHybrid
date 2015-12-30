@@ -5,6 +5,7 @@ format compact
 
 coal_nameplate = 660; % [MW]
 coal_useable = coal_nameplate*0.92; % 607.2 [MW]
+coal_min = coal_nameplate*0.4; % 264 [MW] 
 coal_num = 14;
 
 % ==============================
@@ -33,6 +34,9 @@ coal_baseload = 3.22; % Baseload variable cost [$/MWh]
 wind_file = 'Xilingol_2009';
 load(wind_file);
 wind_pwr = round(p*2500)';
+
+% wind_ratio = linspace(1,1,3); % Not allow economic wind curtialment
+wind_ratio = linspace(1,0,101); % Allow economic wind curtialment
 
 target_pwr = 8500;
 
@@ -83,46 +87,41 @@ target_pwr = 8500;
 % ylabel('Number of Plants Dispatched (Count)');
 % my_gridline;
 
-load  MyopicDispatch;
+load  MyopicDispatch; % 'v_range', 'cmt_myopic', 'f_myopic', 'u_myopic', 'v_myopic'
+id_range = 1:length(v_range);
 
 
 %% Myopic dispatch
-tic;
+% id_ratio = zeros(1, length(wind_pwr));
+% id_dispatch = zeros(1, length(wind_pwr));
+% wind_dispatch = zeros(1, length(wind_pwr));
+% coal_dispatch = zeros(1, length(wind_pwr));
+% tic;
+% for t = 1:length(wind_pwr)
+%     wind_pwr_tmp = wind_pwr(t)*wind_ratio;
+%     coal_pwr_tmp = target_pwr - wind_pwr_tmp;
+%     coal_pwr_tmp(coal_pwr_tmp<coal_min) = coal_min;
+%     
+%     id_tmp = interp1(v_range, id_range, coal_pwr_tmp);
+%     id_tmp = ceil(id_tmp);
+%     f_tmp = interp1(id_range, f_myopic, id_tmp);
+%     
+%     cost_base_vom = coal_pwr_tmp*coal_baseload;
+%     cost_fuel = f_tmp*coal_price;
+%     [value, id_opt] = min(cost_base_vom + cost_fuel);
+%     id_ratio(t) = id_opt;
+%     id_dispatch(t) = id_tmp(id_opt);
+%     coal_dispatch(t) = coal_pwr_tmp(id_opt);
+%     wind_dispatch(t) = target_pwr - coal_dispatch(t);
+% end
+% cmt_dispatch = cmt_myopic(id_dispatch);
+% f_dispatch = f_myopic(id_dispatch); % [ton/h]
+% v_dispatch = v_myopic(:,id_dispatch);
+% u_dispatch = u_myopic(:,id_dispatch);
+% wind_curtail = wind_pwr - wind_dispatch;
+% toc;
 
-% coal_pwr = target_pwr - wind_pwr; % Use coal to make up deficit
-% wind_curtail = (coal_pwr + wind_pwr) - target_pwr;
-
-wind_ratio = linspace(1,0,11);
-id_ratio = zeros(1, length(wind_pwr));
-id_dispatch = zeros(1, length(wind_pwr));
-wind_dispatch = zeros(1, length(wind_pwr));
-coal_dispatch = zeros(1, length(wind_pwr));
-for t = 1:length(wind_pwr)
-    wind_pwr_tmp = wind_pwr(t)*wind_ratio;
-    coal_pwr_tmp = target_pwr - wind_pwr_tmp;
-
-    id_tmp = zeros(1,length(wind_ratio));
-    f_tmp = zeros(1,length(wind_ratio));
-    for wr = 1:length(wind_ratio)
-        id_tmp(wr) = find(v_range>=coal_pwr_tmp(wr), 1, 'first');
-        f_tmp(wr) = f_myopic(id_tmp(wr));
-    end
-    cost_base_vom = coal_pwr_tmp*coal_baseload;
-    cost_fuel = f_tmp*coal_price;
-    [value, id_opt] = min(cost_base_vom + cost_fuel);
-    id_ratio(t) = id_opt;
-    id_dispatch(t) = id_tmp(id_opt);
-    wind_dispatch(t) = wind_pwr_tmp(id_opt);
-    coal_dispatch(t) = coal_pwr_tmp(id_opt);
-end
-cmt_dispatch = cmt_myopic(id_dispatch);
-f_dispatch = f_myopic(id_dispatch); % [ton/h]
-v_dispatch = v_myopic(:,id_dispatch);
-u_dispatch = u_myopic(:,id_dispatch);
-wind_curtail = wind_pwr - wind_dispatch;
-toc;
-
-% load(['Myopic_', wind_file, '_nominal_new']);
+load(['Myopic_', wind_file, '_nominal']);
 
 
 %% ========================================================================
@@ -167,12 +166,12 @@ pctg_base_vom = cost_base_vom/cost_total
 pctg_fuel = cost_fuel/cost_total
 pctg_ramp = cost_ramp/cost_total
 
-save(['Myopic_', wind_file, '_nominal'], ...
-     'id_dispatch', 'cmt_dispatch', 'f_dispatch', ...
-     'coal_dispatch', 'v_dispatch', 'u_dispatch', ...
-     'wind_dispatch', 'wind_pwr', 'wind_curtail', ...
-     'opt_cost_startup', 'opt_cost_base_vom', 'opt_cost_fuel', 'opt_cost_ramp', ...
-     'cost_startup', 'cost_base_vom', 'cost_fuel', 'cost_ramp', 'cost_total');
+% save(['Myopic_', wind_file, '_nominal'], ...
+%      'id_dispatch', 'cmt_dispatch', 'f_dispatch', ...
+%      'coal_dispatch', 'v_dispatch', 'u_dispatch', ...
+%      'wind_dispatch', 'wind_pwr', 'wind_curtail', ...
+%      'opt_cost_startup', 'opt_cost_base_vom', 'opt_cost_fuel', 'opt_cost_ramp', ...
+%      'cost_startup', 'cost_base_vom', 'cost_fuel', 'cost_ramp', 'cost_total');
 
 
 %% ========================================================================
@@ -211,7 +210,7 @@ set(ha(3), 'facec', [0 0.7 0]);
 
 area(v_dispatch', 'facec', 'none', 'edgecolor', [1 1 1]);
 for i = 1:length(id_jump)
-plot(id_jump(i)+[0 1], coal_pwr(id_jump(i)+[0 1]), 'ko-', 'markersize', 2, 'markerf', 'k');
+plot(id_jump(i)+[0 1], coal_dispatch(id_jump(i)+[0 1]), 'ko-', 'markersize', 2, 'markerf', 'k');
 end
 
 ylim([0 9000]);
@@ -221,6 +220,8 @@ set(gca, 'ytick', 0:1500:9000);
 set(gca, 'layer', 'top');
 ylabel('Total Output Power (MW)');
 title('Time Window: 4 Weeks');
+% legend('Coal', 'Wind', 'Wind Curtailment');
+% set(legend, 'location', 'northwest');
 
 % ====================
 ax2 = subplot(4,1,3); hold on; box on;
@@ -257,5 +258,4 @@ linkaxes([ax1, ax2, ax3], 'x');
 % export_fig myopic -painters
 
 end
-
 

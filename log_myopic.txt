@@ -1,15 +1,15 @@
-Elapsed time is 1.790911 seconds.
+Elapsed time is 15.349592 seconds.
 cost_startup =
    4.4398e+07
 cost_base_vom =
-   211762352
+   2.1176e+08
 cost_fuel =
    1.2278e+09
 cost_ramp =
    1.7227e+07
 ====================
 cost_total =
-  1.5012e+09
+   1.5012e+09
 ====================
 pctg_startup =
     0.0296
@@ -19,4 +19,3 @@ pctg_fuel =
     0.8179
 pctg_ramp =
     0.0115
->> 
