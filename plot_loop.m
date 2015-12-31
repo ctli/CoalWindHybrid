@@ -33,6 +33,23 @@ dp1 = load(['DP_', wind_file, '_nominal']);
 dp2 = load(['DP_', wind_file, '_nominal_new']);
 isequal(dp1.J_star, dp2.J_star)  % not same
 
-% dp = load(['DP_', wind_file, '_loop']);
-% dp_new = load(['DP_', wind_file, '_loop_new']);
+% ==============================
+dp = load(['DP_', wind_file, '_loop']);
+dp_new = load(['DP_', wind_file, '_loop_new']);
+
+% ====================
+% Total generation cost
+figure(1); clf; hold on; grid on;
+mesh(wind_pwr_range, target_pwr_range, dp.table_cost_total'/1e9);
+mesh(wind_pwr_range, target_pwr_range, dp_new.table_cost_total'/1e9);
+xlabel('Wind Capacity (MW)');
+ylabel('Target Output (MW)');
+zlabel('Total Generation Cost (Billion USD)');
+ylim([2000 10000]);
+zlim([0 1.8]);
+view(35, 10);
+alpha(0.5);
+
+text(wind_pwr_range(end), target_pwr_range(1), dp.table_cost_total(end,1)'/1e9, '\leftarrowDP');
+text(wind_pwr_range(end), target_pwr_range(1), dp_new.table_cost_total(end,1)'/1e9, '\leftarrowDP w/ Economic Wind Curtailment');
 
