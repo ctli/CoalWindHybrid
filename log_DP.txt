@@ -1,46 +1,11 @@
-Elapsed time is 4.252134 seconds.
+Elapsed time is 8.870904 seconds.
 cost_startup =
-     0
+   3.1051e+06
 cost_base_vom =
    2.1176e+08
 cost_fuel =
-   1.2499e+09
+   1.2419e+09
 cost_ramp =
-   2.3686e+06
-====================
+   3.2386e+06
 cost_total =
-   1.4640e+09
-diff_pctg =
-  -3.6648e-05
-====================
-pctg_startup =
-     0
-pctg_base_vom =
-    0.1446
-pctg_fuel =
-    0.8537
-pctg_ramp =
-    0.0016
-========================================
-========================================
-Elapsed time is 11.675342 seconds. (wind curtailment allowed)
-cost_startup =
-     0
-cost_base_vom =
-   2.1176e+08
-cost_fuel =
-   1.2436e+09
-cost_ramp =
-   3.3130e+06
-====================
-cost_total =
-   1.4587e+09
-====================
-pctg_startup =
-     0
-pctg_base_vom =
-    0.1452
-pctg_fuel =
-    0.8526
-pctg_ramp =
-    0.0023
+   1.4600e+09

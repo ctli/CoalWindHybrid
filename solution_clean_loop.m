@@ -7,7 +7,7 @@ coal_nameplate = 660; % [MW]
 
 coal_num = 14; % 3 units
 
-dx = 10000;
+dx = 12%10000;
 u_coal_unit = linspace(0.4,1,dx) * coal_nameplate;
 v_coal_unit = u_coal_unit-0.08*coal_nameplate;
 f_coal_unit = (266*linspace(0.4,1,dx).^2 -507*linspace(0.4,1,dx) + 542).*linspace(0.4,1,dx)*coal_nameplate/1e3; % [ton/h]
@@ -18,12 +18,11 @@ f_min = min(f_coal_unit);
 
 %% ========================================================================
 % 211.2~8500.8MW -> round to 220-8500MW
-v_range = 220:0.1:8500; % [1x82801]
-u_table = zeros(coal_num, length(v_range), coal_num); % [14 units]x[pwr range]x[cmt]
-v_table = zeros(coal_num, length(v_range), coal_num); % [14 units]x[pwr range]x[cmt]
-f_table = zeros(length(v_range), coal_num); % [pwr range]x[cmt]
-id_st = zeros(coal_num, 1); % Starting entry that is not nan
-id_ed = zeros(coal_num, 1); % Ending entry that is not nan
+v_range = 220:360:8500;%220:0.1:8500; % [1x82801]
+u_table = nan*ones(coal_num, length(v_range), coal_num); % [14 units]x[pwr range]x[cmt]
+v_table = nan*ones(coal_num, length(v_range), coal_num); % [14 units]x[pwr range]x[cmt]
+f_table = nan*ones(coal_num, length(v_range), coal_num); % [14 units]x[pwr range]x[cmt]
+f_table_sum = nan*ones(length(v_range), coal_num); % [pwr range]x[cmt]
 
 % ====================
 % No unit
@@ -40,7 +39,8 @@ u_table(n,:,n) =  u1_extended;
 v1_extended = interp1(v_coal_unit, v_coal_unit, v_range);
 v_table(n,:,n) =  v1_extended;
 f1_extended = interp1(v_coal_unit, f_coal_unit, v_range);
-f_table(:,n) =  f1_extended;
+f_table(n,:,n) =  f1_extended;
+f_table_sum(:,n) = f_table(n,:,n);
 id_st(n) = find(~isnan(f1_extended)==1, 1, 'first');
 id_ed(n) = find(~isnan(f1_extended)==1, 1, 'last');
 
@@ -83,32 +83,38 @@ for n = 2:coal_num
     
     id_col = 1:length(id_row);
     id = sub2ind([n,dx], id_row, id_col);
-    opt_f = value; % [1]x[dx]
+    opt_f_sum = value; % [1]x[dx]
     opt_u = zeros(n,dx);
     opt_v = zeros(n,dx);
+    opt_f = zeros(n,dx);
     for nn = 1:n
         u1_extended = squeeze(u_extended(nn,:,:))';
         opt_u(nn,:) = u1_extended(id);
         v1_extended = squeeze(v_extended(nn,:,:))';
         opt_v(nn,:) = v1_extended(id);
+        f1_extended = squeeze(f_extended(nn,:,:))';
+        opt_f(nn,:) = f1_extended(id);
         
         % Save opt solutions to tables
         u1_extended = interp1(v_long, opt_u(nn,:), v_range);
         u_table(nn,:,n) = u1_extended;
         v1_extended = interp1(v_long, opt_v(nn,:), v_range);
         v_table(nn,:,n) = v1_extended;
+        f1_extended = interp1(v_long, opt_f(nn,:), v_range);
+        f_table(nn,:,n) = f1_extended;
     end
-    f_extended = interp1(v_long, opt_f, v_range);
-    f_table(:,n) = f_extended;
-    id_st(n) = find(~isnan(f_extended)==1, 1, 'first');
-    id_ed(n) = find(~isnan(f_extended)==1, 1, 'last');
+    f_sum_extended = interp1(v_long, opt_f_sum, v_range)
+    sum(f_table(:,:,n))
+    % !!! check zero & nan entries in f_table !!!
+    
+    f_table_sum(:,n) = f_sum_extended;
     
     figure(3);
-    plot(v_long, opt_f);
+    plot(v_long, opt_f_sum);
     if n<11
-    text(v_long(end), opt_f(end), [' ', num2str(n), ' Units are commited'], 'fontsize', 7);
+    text(v_long(end), opt_f_sum(end), [' ', num2str(n), ' Units are commited'], 'fontsize', 7);
     else
-    text(v_long(1), opt_f(1), [' ', num2str(n), ' Units are commited '], 'fontsize', 7, 'horizontalalignment', 'right');
+    text(v_long(1), opt_f_sum(1), [' ', num2str(n), ' Units are commited '], 'fontsize', 7, 'horizontalalignment', 'right');
     end
     
     toc;
@@ -117,14 +123,15 @@ xlabel('Output Power, MW (in-house use excluded)');
 ylabel('Coal Consumption (ton/h)');
 my_gridline;
 
+f_table_sum2 = squeeze(sum(f_table));
+
 % v_st = v_range(id_st);
 % v_ed = v_range(id_ed);
 % save('FourteenUnits', ...
 %      'v_range', ...
-%      'f_table', 'u_table', 'v_table', ...
-%      'id_st', 'id_ed', 'v_st', 'v_ed');
+%      'f_table', 'u_table', 'v_table');
 
-% ====================
+% % ====================
 % figure(1); clf;
 % opt_u = flipud(opt_u);
 % for nn = 1:n

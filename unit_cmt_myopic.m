@@ -3,9 +3,13 @@ close all
 clc
 format compact
 
+load FourteenUnits; % 'v_range', 'f_table', 'u_table', 'v_table', 'id_st', 'id_ed', 'v_st', 'v_ed'
+id_range = 1:length(v_range);
+
 coal_nameplate = 660; % [MW]
 coal_useable = coal_nameplate*0.92; % 607.2 [MW]
-coal_min = coal_nameplate*0.4; % 264 [MW] 
+u_min = coal_nameplate*0.4; % 264 [MW]
+v_min = min(v_range); % 220 [MW]; 0.33 of capacity
 coal_num = 14;
 
 % ==============================
@@ -35,46 +39,51 @@ wind_file = 'Xilingol_2009';
 load(wind_file);
 wind_pwr = round(p*2500)';
 
-% wind_ratio = linspace(1,1,3); % Not allow economic wind curtialment
-wind_ratio = linspace(1,0,101); % Allow economic wind curtialment
+% wind_ratio = linspace(1,1,3); save_name = ['Myopic_', wind_file, '_nominal']; % Not allow economic wind curtialment
+wind_ratio = linspace(1,0,101); save_name = ['Myopic_', wind_file, '_nominal_new']; % Allow economic wind curtialment
 
 target_pwr = 8500;
 
 
 %% Myopic unit commitment
-% load FourteenUnits;
-% 
-% f_myopic = zeros(1,length(v_range));
 % cmt_myopic = zeros(1,length(v_range));
+% f_sum_myopic = zeros(1,length(v_range));
+% f_myopic = zeros(coal_num,length(v_range));
 % v_myopic = zeros(coal_num,length(v_range));
 % u_myopic = zeros(coal_num,length(v_range));
 % tic;
 % for vv = 1:length(v_range)
-%     f_column = f_table(vv,:);
-%     [f_myopic(vv), cmt_myopic(vv)] = min(f_column);
-%     v_myopic(:,vv) = v_table(:,vv,cmt_myopic(vv));
-%     u_myopic(:,vv) = u_table(:,vv,cmt_myopic(vv));
+%     f_column = f_table_sum(:,vv);
+%     [f_sum_myopic(vv), cmt_myopic(vv)] = min(f_column);
+%     f_myopic(:,vv) = f_table(:,cmt_myopic(vv),vv);
+%     v_myopic(:,vv) = v_table(:,cmt_myopic(vv),vv);
+%     u_myopic(:,vv) = u_table(:,cmt_myopic(vv),vv);
 % end
 % toc;
-% save('MyopicDispatch', 'v_range', 'f_myopic', 'cmt_myopic', 'v_myopic', 'u_myopic');
+% save('MyopicDispatch', 'v_range', 'cmt_myopic', 'f_sum_myopic', 'f_myopic', 'v_myopic', 'u_myopic');
 % 
-% % ====================
+% ====================
 % figure(1); clf; hold on; box on; % Fuel consumption
 % plot(0,0,'x');
-% plot(v_range, f_table, 'linewidth', 1);
+% plot(v_range, f_table_sum, 'linewidth', 1);
 % for n = 1:coal_num
+%     not_nan = ~isnan(f_table_sum(n,:));
+%     id_st = find(not_nan==1, 1, 'first');
+%     id_ed = find(not_nan==1, 1, 'last');
+%     v_st = v_range(id_st);
+%     v_ed = v_range(id_ed);
 %     if n==1
-%         text(v_ed(n), max(f_table(:,n)), [' ', num2str(n), ' Unit is commited'], 'fontsize', 7);
+%         text(v_ed, max(f_table_sum(n,:)), [' ', num2str(n), ' Unit is commited'], 'fontsize', 7);
 %     elseif n<11
-%         text(v_ed(n), max(f_table(:,n)), [' ', num2str(n), ' Units are commited'], 'fontsize', 7);
+%         text(v_ed, max(f_table_sum(n,:)), [' ', num2str(n), ' Units are commited'], 'fontsize', 7);
 %     else
-%         text(v_st(n), min(f_table(:,n)), [' ', num2str(n), ' Units are commited '], 'fontsize', 7, 'horizontalalignment', 'right');
+%         text(v_st, min(f_table_sum(n,:)), [' ', num2str(n), ' Units are commited '], 'fontsize', 7, 'horizontalalignment', 'right');
 %     end
 % end
 % xlabel('Output Power, MW (in-house use excluded)');
 % ylabel('Coal Consumption (ton/h)');
 % my_gridline;
-% h1 = plot(v_range, f_myopic, 'color', [1 1 1]*0, 'linewidth', 0.35);
+% h1 = plot(v_range, f_sum_myopic, 'color', [1 1 1]*0, 'linewidth', 0.35);
 % legend(h1, 'Myopic Dispatch');
 % set(legend, 'location', 'northwest');
 % 
@@ -87,24 +96,22 @@ target_pwr = 8500;
 % ylabel('Number of Plants Dispatched (Count)');
 % my_gridline;
 
-load  MyopicDispatch; % 'v_range', 'cmt_myopic', 'f_myopic', 'u_myopic', 'v_myopic'
-id_range = 1:length(v_range);
+load  MyopicDispatch; % 'v_range', 'cmt_myopic', 'f_sum_myopic', 'f_myopic', 'v_myopic', 'u_myopic'
 
 
 %% Myopic dispatch
 % id_ratio = zeros(1, length(wind_pwr));
 % id_dispatch = zeros(1, length(wind_pwr));
-% wind_dispatch = zeros(1, length(wind_pwr));
 % coal_dispatch = zeros(1, length(wind_pwr));
 % tic;
 % for t = 1:length(wind_pwr)
 %     wind_pwr_tmp = wind_pwr(t)*wind_ratio;
 %     coal_pwr_tmp = target_pwr - wind_pwr_tmp;
-%     coal_pwr_tmp(coal_pwr_tmp<coal_min) = coal_min;
+%     coal_pwr_tmp(coal_pwr_tmp<v_min) = v_min;
 %     
 %     id_tmp = interp1(v_range, id_range, coal_pwr_tmp);
 %     id_tmp = ceil(id_tmp);
-%     f_tmp = interp1(id_range, f_myopic, id_tmp);
+%     f_tmp = interp1(id_range, f_sum_myopic, id_tmp);
 %     
 %     cost_base_vom = coal_pwr_tmp*coal_baseload;
 %     cost_fuel = f_tmp*coal_price;
@@ -112,21 +119,22 @@ id_range = 1:length(v_range);
 %     id_ratio(t) = id_opt;
 %     id_dispatch(t) = id_tmp(id_opt);
 %     coal_dispatch(t) = coal_pwr_tmp(id_opt);
-%     wind_dispatch(t) = target_pwr - coal_dispatch(t);
 % end
+% toc;
 % cmt_dispatch = cmt_myopic(id_dispatch);
-% f_dispatch = f_myopic(id_dispatch); % [ton/h]
+% f_sum_dispatch = f_sum_myopic(id_dispatch); % [ton/h]
+% f_dispatch = f_myopic(:,id_dispatch);
 % v_dispatch = v_myopic(:,id_dispatch);
 % u_dispatch = u_myopic(:,id_dispatch);
+% wind_dispatch = target_pwr - coal_dispatch;
 % wind_curtail = wind_pwr - wind_dispatch;
-% toc;
 
 load(['Myopic_', wind_file, '_nominal']);
 
 
 %% ========================================================================
 % Check ramping
-d_coal_pwr = [zeros(1,coal_num); diff(u_dispatch')]'; % [14]x[8760]
+d_coal_pwr = [zeros(1,coal_num); diff(u_dispatch')]'; % [8760]x[14]
 d_coal_pctg = d_coal_pwr/coal_nameplate;
 
 % Check changes in commitment
@@ -143,7 +151,7 @@ id_jump = find(abs(d_cmt)>1) - 1;
 %% Costs
 opt_cost_startup = cmt_c * coal_startup_cost;
 opt_cost_base_vom = coal_dispatch * coal_baseload;
-opt_cost_fuel = f_dispatch * coal_price;
+opt_cost_fuel = f_sum_dispatch * coal_price;
 
 % opt_cost_ramp = abs(d_coal_pwr(:)) * coal_loadfollow;
 x = abs(d_coal_pctg);
@@ -166,16 +174,16 @@ pctg_base_vom = cost_base_vom/cost_total
 pctg_fuel = cost_fuel/cost_total
 pctg_ramp = cost_ramp/cost_total
 
-% save(['Myopic_', wind_file, '_nominal'], ...
-%      'id_dispatch', 'cmt_dispatch', 'f_dispatch', ...
-%      'coal_dispatch', 'v_dispatch', 'u_dispatch', ...
-%      'wind_dispatch', 'wind_pwr', 'wind_curtail', ...
+% save(save_name, ...
+%      'id_ratio', 'id_dispatch', 'cmt_dispatch', 'f_sum_dispatch', ...
+%      'f_dispatch', 'v_dispatch', 'u_dispatch', ...
+%      'coal_dispatch', 'wind_dispatch', 'wind_curtail', 'wind_pwr', ...
 %      'opt_cost_startup', 'opt_cost_base_vom', 'opt_cost_fuel', 'opt_cost_ramp', ...
 %      'cost_startup', 'cost_base_vom', 'cost_fuel', 'cost_ramp', 'cost_total');
 
 
 %% ========================================================================
-plot_switch = 'off'; % on/off
+plot_switch = 'on'; % on/off
 switch plot_switch
     case 'on'
 v_unique = zeros(1, length(wind_pwr));
@@ -183,7 +191,6 @@ u_unique = zeros(1, length(wind_pwr));
 for t = 1:length(wind_pwr)
     vt = v_dispatch(1:cmt_dispatch(t),t);
     if length(unique(vt))>1
-        disp([num2str(t), ': output power not equally distributed']); % this will triger errors
         v_unique(t) = vt(1);
     else
         v_unique(t) = unique(vt);
@@ -191,7 +198,6 @@ for t = 1:length(wind_pwr)
 
     ut = u_dispatch(1:cmt_dispatch(t),t);
     if length(unique(ut))>1
-        disp([num2str(t), ': output power not equally distributed']); % this will triger errors
         u_unique(t) = ut(1);
     else
         u_unique(t) = unique(ut);
