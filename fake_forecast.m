@@ -19,37 +19,37 @@ format compact
 
 
 %% =====================================================================
-% wind_file = 'Xilingol_2009';
-% load(wind_file);
-% wind_pwr = round(p*2500)';
+wind_file = 'Xilingol_2009';
+load(wind_file);
+wind_pwr = round(p*2500)';
 
-% % ====================
-% figure(1); clf;
-% set(gcf, 'units', 'inch', 'pos', [2.9792    1.4583    5.8333    6.75]);
-% 
-% subplot(3,1,1);
-% bin = 0:2.5:25;
-% n = hist(v, bin);
-% bar(bin, n/sum(n), 1, 'facec', [0.3 0.65 1]);
-% xlabel('Wind Speed (m/s)')
-% ylabel('Probability (-)');
-% xlim([-1.5 26.5]);
-% 
-% subplot(3,1,2);
-% bin = 0:0.1:1;
-% n = hist(p, bin);
-% bar(bin, n/sum(n), 1, 'facec', [0.3 0.65 1]);
-% xlabel('Wind Power (-)')
-% ylabel('Probability (-)');
-% xlim([-0.06 1.06]);
-% 
-% subplot(3,1,3);
-% lag_number = 48;
-% autocorr(p,lag_number);
-% set(gca, 'xtick', 0:4:48);
-% xlim([-1 49]);
-% ylim([-0.1 1.1]);
-% set(gca, 'ytick', -0:0.25:1);
+% ====================
+figure(1); clf;
+set(gcf, 'units', 'inch', 'pos', [2.9792    1.4583    5.8333    6.75]);
+
+subplot(3,1,1);
+bin = 0:2.5:25;
+n = hist(v, bin);
+bar(bin, n/sum(n), 1, 'facec', [0.3 0.65 1]);
+xlabel('Wind Speed (m/s)')
+ylabel('Probability (-)');
+xlim([-1.5 26.5]);
+
+subplot(3,1,2);
+bin = 0:0.1:1;
+n = hist(p, bin);
+bar(bin, n/sum(n), 1, 'facec', [0.3 0.65 1]);
+xlabel('Wind Power (-)')
+ylabel('Probability (-)');
+xlim([-0.06 1.06]);
+
+subplot(3,1,3);
+lag_number = 48;
+autocorr(p,lag_number);
+set(gca, 'xtick', 0:4:48);
+xlim([-1 49]);
+ylim([-0.1 1.1]);
+set(gca, 'ytick', -0:0.25:1);
 
 
 %% =====================================================================
@@ -91,17 +91,35 @@ format compact
 % 
 % % ====================
 % rng(1); % Fix the seed of random generator
-% xr = mvnrnd(mu,sig,200);
+% X = mvnrnd(zeros(1,n),sig,200);
 % 
 % figure(3); clf; hold on; box on;
-% plot(xr');
-% plot(xr(1,:), 'k', 'linewidth', 2);
+% plot(X');
+% plot(X(1,:), 'k', 'linewidth', 2);
 % xlim([0 24]);
 
 
 %% =====================================================================
-wind_file = 'Xilingol_2009';
-load(wind_file);
+% wind_file = 'Xilingol_2009';
+% load(wind_file);
+
+yr_range = 1979:2009;
+file_prefix = 'Xilingol_';
+
+p_log = nan*ones(8760, length(yr_range));
+v_log = nan*ones(8760, length(yr_range));
+for iy = 1:length(yr_range)
+    yr = yr_range(iy);
+    file_name = [file_prefix, num2str(yr)];
+    load(file_name);
+    if length(p)>=8760;
+        p_log(:,iy) = p(1:8760);
+    end
+    if length(v)>=8760;
+        v_log(:,iy) = v(1:8760);
+    end
+end
+p = v_log(:);
 
 n = 24;
 x = zeros(length(p)-n+1, n);
@@ -111,7 +129,6 @@ for nn = 1:n
     xn = p(st:end-ed);
     x(:,nn) = xn;
 end
-mu = mean(x);
 
 % ====================
 N = length(x);
@@ -126,14 +143,44 @@ for r = 1:n % Row
         sig(r,c) = cov_ij;
     end
 end
+sig_log = sig;
 
-% ====================
+figure(100); clf;
+surf(sig_log);
+
+
+%% ====================
 rng(1); % Fix the seed of random generator
-xr = mvnrnd(mu,sig,50);
+sig = sig_log;
+X = mvnrnd(zeros(1,n),sig,50);
 
 figure(3); clf; hold on; box on;
-plot(xr');
-plot(xr(1,:), 'k', 'linewidth', 2);
+plot(X');
+plot(X(1,:), 'k', 'linewidth', 2);
 xlim([0 25]);
-title('50 Realizations of 24-Hr Long Random Variables');
+title('X (Normal Distribution: -inf~+inf)');
 
+%% ===========
+% Y = sqrt(2)*erfinv(2*X-1); % Uniform distribution->normal distribution (http://www.mathworks.com/matlabcentral/answers/35281-transforming-uniform-variables-to-normal-variables)
+% figure(4); clf; hold on; box on;
+% plot(Y');
+% plot(Y(1,:), 'k', 'linewidth', 2);
+% xlim([0 25]);
+% title('50 Realizations of 24-Hr Long Random Variables');
+
+% Normal distribution->uniform distribution (http://math.stackexchange.com/questions/153793/how-to-transform-normally-distributed-random-sequence-n0-1-to-uniformly-distri)
+Y = 0.5*(erf(X/sqrt(2))+1);
+figure(5); clf; hold on; box on;
+plot(Y');
+plot(Y(1,:), 'k', 'linewidth', 2);
+xlim([0 25]);
+title('Y (Uniform Distribution: 0~1)');
+
+%% 
+load Xilingol_probability;
+p_realization = interp1(Fv,xv,Y);
+
+figure(6); clf; hold on; box on;
+plot(p_realization');
+plot(p_realization(1,:), 'k', 'linewidth', 2);
+title('p (Realization)');
