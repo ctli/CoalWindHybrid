@@ -49,17 +49,17 @@ target_pwr_range = 2500:500:8500; % [1x13]
 %% Myopic unit commitment
 % load  MyopicDispatch;
 % 
-% table_coal_pwr_v    = zeros(length(wind_pwr_range), length(target_pwr_range));
-% table_coal_pwr_u    = zeros(length(wind_pwr_range), length(target_pwr_range));
-% table_wind_pwr      = zeros(length(wind_pwr_range), length(target_pwr_range));
+% table_coal_v        = zeros(length(wind_pwr_range), length(target_pwr_range));
+% table_coal_u        = zeros(length(wind_pwr_range), length(target_pwr_range));
+% table_coal_dispatch = zeros(length(wind_pwr_range), length(target_pwr_range));
 % table_wind_dispatch = zeros(length(wind_pwr_range), length(target_pwr_range));
 % table_wind_curtail  = zeros(length(wind_pwr_range), length(target_pwr_range));
 % 
-% table_cost_total    = zeros(length(wind_pwr_range), length(target_pwr_range));
-% table_cost_fuel     = zeros(length(wind_pwr_range), length(target_pwr_range));
 % table_cost_startup  = zeros(length(wind_pwr_range), length(target_pwr_range));
 % table_cost_base_vom = zeros(length(wind_pwr_range), length(target_pwr_range));
+% table_cost_fuel     = zeros(length(wind_pwr_range), length(target_pwr_range));
 % table_cost_ramp     = zeros(length(wind_pwr_range), length(target_pwr_range));
+% table_cost_total    = zeros(length(wind_pwr_range), length(target_pwr_range));
 % 
 % tic;
 % for w = 1:length(wind_pwr_range)
@@ -129,12 +129,11 @@ target_pwr_range = 2500:500:8500; % [1x13]
 % cost_total = cost_startup + cost_base_vom + cost_fuel + cost_ramp;
 % 
 % % ====================
-% table_coal_pwr_v(w,tg) = sum(v_dispatch(:));
-% table_coal_pwr_u(w,tg) = sum(u_dispatch(:));
-% 
-% table_wind_pwr(w,tg)     = sum(wind_pwr(:));
-% table_wind_dispatch(w,tg)= sum(wind_dispatch(:));
-% table_wind_curtail(w,tg) = sum(wind_curtail(:));
+% table_coal_v(w,tg) = sum(v_dispatch(:));
+% table_coal_u(w,tg) = sum(u_dispatch(:));
+% table_coal_dispatch(w,tg)= sum(coal_dispatch);
+% table_wind_dispatch(w,tg)= sum(wind_dispatch);
+% table_wind_curtail(w,tg) = sum(wind_curtail);
 % 
 % table_cost_startup(w,tg)  = cost_startup;
 % table_cost_base_vom(w,tg) = cost_base_vom;
@@ -145,20 +144,19 @@ target_pwr_range = 2500:500:8500; % [1x13]
 % toc;
 % end
 % end
+% 
+% % save(save_name, ...
+% %      'table_coal_v', 'table_coal_u', ...
+% %      'table_coal_dispatch', 'table_wind_dispatch', 'table_wind_curtail', ...
+% %      'table_cost_startup', 'table_cost_base_vom', 'table_cost_fuel', 'table_cost_ramp', 'table_cost_total');
 
-% save(save_name, ...
-%      'table_coal_pwr_v', 'table_coal_pwr_u', ...
-%      'table_wind_pwr', 'table_wind_dispatch', 'table_wind_curtail', ...
-%      'table_cost_startup', 'table_cost_base_vom', 'table_cost_fuel', 'table_cost_ramp', 'table_cost_total');
-
-% load(['Myopic_', wind_file, '_loop']);
-% load(['Myopic_', wind_file, '_loop_new']);
+load(save_name);
 
 pctg_startup = table_cost_startup./table_cost_total;
 pctg_base_vom = table_cost_base_vom./table_cost_total;
 pctg_fuel = table_cost_fuel./table_cost_total;
 pctg_ramp = table_cost_ramp./table_cost_total;
-pctg_wind_curtail = table_wind_curtail./(table_wind_pwr + table_wind_curtail);
+pctg_wind_curtail = table_wind_curtail./(table_wind_dispatch + table_wind_curtail);
 
 
 %% Total generation cost
@@ -183,18 +181,6 @@ set(gca, 'xtick', 0:1000:5000);
 set(gca, 'clim', [0.3 1.65]);
 grid on;
 
-% ====================
-figure(12); clf;
-[C,h] = contourf(target_pwr_range, wind_pwr_range, table_cost_total/1e9);
-clabel(C, h);
-ylabel('Wind Capacity (MW)');
-xlabel('Target Output (MW)');
-title('Countour: Total Generation Cost (Billion USD)');
-set(gca, 'ytick', 0:1000:5000);
-set(gca, 'clim', [0.3 1.65]);
-grid on;
-
-
 %% Share of fuel cost
 figure(2); clf;
 surf(wind_pwr_range, target_pwr_range, pctg_fuel');
@@ -217,18 +203,6 @@ set(gca, 'xtick', 0:1000:5000);
 set(gca, 'clim', [0.66 0.86]);
 grid on;
 
-% ====================
-figure(22); clf;
-[C,h] = contourf(target_pwr_range, wind_pwr_range, pctg_fuel);
-clabel(C, h);
-ylabel('Wind Capacity (MW)');
-xlabel('Target Output (MW)');
-title('Countour: Share of Fuel Cost (-)');
-set(gca, 'ytick', 0:1000:5000);
-set(gca, 'clim', [0.66 0.86]);
-grid on;
-
-
 %% Wind curtailment
 figure(3); clf;
 surf(wind_pwr_range, target_pwr_range, pctg_wind_curtail');
@@ -236,8 +210,8 @@ xlabel('Wind Capacity (MW)');
 ylabel('Target Output (MW)');
 zlabel('Wind Curtailment (-)');
 ylim([2000 10000]);
-zlim([0 0.3]);
-set(gca, 'clim', [0 0.3]);
+zlim([0 0.4]);
+set(gca, 'clim', [0 0.4]);
 view(30, 15);
 
 % ====================
@@ -248,17 +222,6 @@ xlabel('Wind Capacity (MW)');
 ylabel('Target Output (MW)');
 title('Countour: Wind Curtailment (-)');
 set(gca, 'xtick', 0:1000:5000);
-set(gca, 'clim', [0 0.3]);
-grid on;
-
-% ====================
-figure(32); clf;
-[C,h] = contourf(target_pwr_range, wind_pwr_range, pctg_wind_curtail);
-clabel(C, h);
-ylabel('Wind Capacity (MW)');
-xlabel('Target Output (MW)');
-title('Countour: Wind Curtailment (-)');
-set(gca, 'ytick', 0:1000:5000);
 set(gca, 'clim', [0 0.3]);
 grid on;
 

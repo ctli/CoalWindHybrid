@@ -5,9 +5,9 @@ format compact
 
 coal_nameplate = 660; % [MW]
 
-coal_num = 14; % 3 units
+coal_num = 14; % 14 units
 
-dx = 12%10000;
+dx = 10000;
 u_coal_unit = linspace(0.4,1,dx) * coal_nameplate;
 v_coal_unit = u_coal_unit-0.08*coal_nameplate;
 f_coal_unit = (266*linspace(0.4,1,dx).^2 -507*linspace(0.4,1,dx) + 542).*linspace(0.4,1,dx)*coal_nameplate/1e3; % [ton/h]
@@ -18,11 +18,11 @@ f_min = min(f_coal_unit);
 
 %% ========================================================================
 % 211.2~8500.8MW -> round to 220-8500MW
-v_range = 220:360:8500;%220:0.1:8500; % [1x82801]
-u_table = nan*ones(coal_num, length(v_range), coal_num); % [14 units]x[pwr range]x[cmt]
-v_table = nan*ones(coal_num, length(v_range), coal_num); % [14 units]x[pwr range]x[cmt]
-f_table = nan*ones(coal_num, length(v_range), coal_num); % [14 units]x[pwr range]x[cmt]
-f_table_sum = nan*ones(length(v_range), coal_num); % [pwr range]x[cmt]
+v_range = 220:0.1:8500; % [1x82801]
+u_table = nan*ones(coal_num, coal_num, length(v_range)); % [14 units]x[cmt]x[pwr range]
+v_table = nan*ones(coal_num, coal_num, length(v_range)); % [14 units]x[cmt]x[pwr range]
+f_table = nan*ones(coal_num, coal_num, length(v_range)); % [14 units]x[cmt]x[pwr range]
+f_table_sum = nan*ones(coal_num, length(v_range)); % [cmt]x[pwr range]
 
 % ====================
 % No unit
@@ -34,15 +34,18 @@ ylabel('Coal Consumption (ton/h)');
 % ====================
 % One unit
 n = 1;
-u1_extended = interp1(v_coal_unit, u_coal_unit, v_range);
-u_table(n,:,n) =  u1_extended;
+u1_extended = interp1(v_coal_unit, u_coal_unit, v_range); % [1x24]
+u_table(n,n,:) =  u1_extended;
 v1_extended = interp1(v_coal_unit, v_coal_unit, v_range);
-v_table(n,:,n) =  v1_extended;
+v_table(n,n,:) =  v1_extended;
 f1_extended = interp1(v_coal_unit, f_coal_unit, v_range);
-f_table(n,:,n) =  f1_extended;
-f_table_sum(:,n) = f_table(n,:,n);
-id_st(n) = find(~isnan(f1_extended)==1, 1, 'first');
-id_ed(n) = find(~isnan(f1_extended)==1, 1, 'last');
+f_table(n,n,:) =  f1_extended;
+f_table_sum(n,:) = f_table(n,n,:);
+for nn = 2:coal_num
+u_table(nn,n,:) =  0;
+v_table(nn,n,:) =  0;
+f_table(nn,n,:) =  0;
+end
 
 figure(3);
 plot(v_coal_unit, f_coal_unit);
@@ -54,13 +57,13 @@ tic;
 for n = 2:coal_num
     v_long = v_coal_unit*n;
 
-    u = ones(n, dx) * u_min;
-    v = ones(n, dx) * v_min;
-    f = ones(n, dx) * f_min;
+    u = ones(n,dx) * u_min;
+    v = ones(n,dx) * v_min;
+    f = ones(n,dx) * f_min;
     
-    u_extended = zeros(n, dx, n);
-    v_extended = zeros(n, dx, n);
-    f_extended = zeros(n, dx, n);
+    u_extended = zeros(n,n,dx);
+    v_extended = zeros(n,n,dx);
+    f_extended = zeros(n,n,dx);
     u_sum = zeros(n, dx);
     v_sum = zeros(n, dx);
     f_sum = zeros(n, dx);
@@ -73,41 +76,43 @@ for n = 2:coal_num
         v_sum(cmt,:) = sum(v);
         f_sum(cmt,:) = sum(f);
         for nn = 1:n
-            u_extended(nn,:,cmt) = interp1(v_sum(cmt,:),u(nn,:),v_long);
-            v_extended(nn,:,cmt) = interp1(v_sum(cmt,:),v(nn,:),v_long);
-            f_extended(nn,:,cmt) = interp1(v_sum(cmt,:),f(nn,:),v_long);
+            u_extended(nn,cmt,:) = interp1(v_sum(cmt,:),u(nn,:),v_long);
+            v_extended(nn,cmt,:) = interp1(v_sum(cmt,:),v(nn,:),v_long);
+            f_extended(nn,cmt,:) = interp1(v_sum(cmt,:),f(nn,:),v_long);
         end
     end
-    f_combined = squeeze(sum(f_extended))';
+    f_combined = squeeze(sum(f_extended));
     [value, id_row] = min(f_combined);
-    
+    opt_f_sum = value; % [1]x[dx]
+    f_sum_extended = interp1(v_long, opt_f_sum, v_range);
+    f_table_sum(n,:) = f_sum_extended;
+
     id_col = 1:length(id_row);
     id = sub2ind([n,dx], id_row, id_col);
-    opt_f_sum = value; % [1]x[dx]
     opt_u = zeros(n,dx);
     opt_v = zeros(n,dx);
     opt_f = zeros(n,dx);
     for nn = 1:n
-        u1_extended = squeeze(u_extended(nn,:,:))';
+        u1_extended = squeeze(u_extended(nn,:,:));
         opt_u(nn,:) = u1_extended(id);
-        v1_extended = squeeze(v_extended(nn,:,:))';
+        v1_extended = squeeze(v_extended(nn,:,:));
         opt_v(nn,:) = v1_extended(id);
-        f1_extended = squeeze(f_extended(nn,:,:))';
+        f1_extended = squeeze(f_extended(nn,:,:));
         opt_f(nn,:) = f1_extended(id);
         
         % Save opt solutions to tables
         u1_extended = interp1(v_long, opt_u(nn,:), v_range);
-        u_table(nn,:,n) = u1_extended;
+        u_table(nn,n,:) = u1_extended;
         v1_extended = interp1(v_long, opt_v(nn,:), v_range);
-        v_table(nn,:,n) = v1_extended;
+        v_table(nn,n,:) = v1_extended;
         f1_extended = interp1(v_long, opt_f(nn,:), v_range);
-        f_table(nn,:,n) = f1_extended;
+        f_table(nn,n,:) = f1_extended;
     end
-    f_sum_extended = interp1(v_long, opt_f_sum, v_range)
-    sum(f_table(:,:,n))
-    % !!! check zero & nan entries in f_table !!!
-    
-    f_table_sum(:,n) = f_sum_extended;
+    for nn = n+1:coal_num
+        u_table(nn,n,:) = 0;
+        v_table(nn,n,:) = 0;
+        f_table(nn,n,:) = 0;
+    end
     
     figure(3);
     plot(v_long, opt_f_sum);
@@ -123,13 +128,10 @@ xlabel('Output Power, MW (in-house use excluded)');
 ylabel('Coal Consumption (ton/h)');
 my_gridline;
 
-f_table_sum2 = squeeze(sum(f_table));
-
-% v_st = v_range(id_st);
-% v_ed = v_range(id_ed);
-% save('FourteenUnits', ...
-%      'v_range', ...
-%      'f_table', 'u_table', 'v_table');
+save('FourteenUnits', ...
+     'v_range', ...
+     'f_table', 'u_table', 'v_table', ...
+     'f_table_sum');
 
 % % ====================
 % figure(1); clf;

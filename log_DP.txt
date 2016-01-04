@@ -1,11 +1,29 @@
-Elapsed time is 8.870904 seconds.
+W/ economic curtailment
+Elapsed time is 105.619676 seconds.
 cost_startup =
-   3.1051e+06
+   2.8687e+07
 cost_base_vom =
-   2.1176e+08
+   3.5212e+07
 cost_fuel =
-   1.2419e+09
+   2.2287e+08
 cost_ramp =
-   3.2386e+06
+   5.9597e+06
 cost_total =
-   1.4600e+09
+   2.9273e+08
+
+==================================
+w/o economic curtailment
+Elapsed time is 12.792205 seconds.
+cost_startup =
+   4.1478e+07
+cost_base_vom =
+   3.4416e+07
+cost_fuel =
+   2.1512e+08
+cost_ramp =
+   6.9770e+06
+cost_total =
+   2.9799e+08
+
+   
+   

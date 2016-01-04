@@ -39,8 +39,8 @@ wind_file = 'Xilingol_2009';
 load(wind_file);
 wind_pwr = round(p*2500)';
 
-% wind_ratio = linspace(1,1,3); save_name = ['Myopic_', wind_file, '_nominal']; % Not allow economic wind curtialment
-wind_ratio = linspace(1,0,101); save_name = ['Myopic_', wind_file, '_nominal_new']; % Allow economic wind curtialment
+wind_ratio = linspace(1,1,3); save_name = ['Myopic_', wind_file, '_nominal']; % Not allow economic wind curtialment
+% wind_ratio = linspace(1,0,101); save_name = ['Myopic_', wind_file, '_nominal_new']; % Allow economic wind curtialment
 
 target_pwr = 8500;
 
@@ -60,9 +60,9 @@ target_pwr = 8500;
 %     u_myopic(:,vv) = u_table(:,cmt_myopic(vv),vv);
 % end
 % toc;
-% save('MyopicDispatch', 'v_range', 'cmt_myopic', 'f_sum_myopic', 'f_myopic', 'v_myopic', 'u_myopic');
+% % save('MyopicDispatch', 'v_range', 'cmt_myopic', 'f_sum_myopic', 'f_myopic', 'v_myopic', 'u_myopic');
 % 
-% ====================
+% % ====================
 % figure(1); clf; hold on; box on; % Fuel consumption
 % plot(0,0,'x');
 % plot(v_range, f_table_sum, 'linewidth', 1);
@@ -183,7 +183,7 @@ pctg_ramp = cost_ramp/cost_total
 
 
 %% ========================================================================
-plot_switch = 'on'; % on/off
+plot_switch = 'off'; % on/off
 switch plot_switch
     case 'on'
 v_unique = zeros(1, length(wind_pwr));
