@@ -53,8 +53,8 @@ target_pwr = 8500;
 % u_myopic = zeros(coal_num,length(v_range));
 % tic;
 % for vv = 1:length(v_range)
-%     f_column = f_table_sum(:,vv);
-%     [f_sum_myopic(vv), cmt_myopic(vv)] = min(f_column);
+%     f_sum_column = f_table_sum(:,vv);
+%     [f_sum_myopic(vv), cmt_myopic(vv)] = min(f_sum_column);
 %     f_myopic(:,vv) = f_table(:,cmt_myopic(vv),vv);
 %     v_myopic(:,vv) = v_table(:,cmt_myopic(vv),vv);
 %     u_myopic(:,vv) = u_table(:,cmt_myopic(vv),vv);
@@ -183,7 +183,7 @@ pctg_ramp = cost_ramp/cost_total
 
 
 %% ========================================================================
-plot_switch = 'off'; % on/off
+plot_switch = 'on'; % on/off
 switch plot_switch
     case 'on'
 v_unique = zeros(1, length(wind_pwr));
@@ -204,7 +204,7 @@ for t = 1:length(wind_pwr)
     end
 end
 %% ==============================
-figure(3); clf; hold on;
+figure(3); clf;
 set(gcf, 'units', 'inch', 'pos', [2.9792    1.4583    5.8333    6.75]);
 
 % ====================
@@ -225,7 +225,7 @@ set(gca, 'xtick', 0:168:24*7*4);
 set(gca, 'ytick', 0:1500:9000);
 set(gca, 'layer', 'top');
 ylabel('Total Output Power (MW)');
-title('Time Window: 4 Weeks');
+title('Myopic Dispatch', 'fontsize', 16);
 % legend('Coal', 'Wind', 'Wind Curtailment');
 % set(legend, 'location', 'northwest');
 
