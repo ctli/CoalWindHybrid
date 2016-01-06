@@ -46,55 +46,55 @@ target_pwr = 8500;
 
 
 %% Myopic unit commitment
-% cmt_myopic = zeros(1,length(v_range));
-% f_sum_myopic = zeros(1,length(v_range));
-% f_myopic = zeros(coal_num,length(v_range));
-% v_myopic = zeros(coal_num,length(v_range));
-% u_myopic = zeros(coal_num,length(v_range));
-% tic;
-% for vv = 1:length(v_range)
-%     f_sum_column = f_table_sum(:,vv);
-%     [f_sum_myopic(vv), cmt_myopic(vv)] = min(f_sum_column);
-%     f_myopic(:,vv) = f_table(:,cmt_myopic(vv),vv);
-%     v_myopic(:,vv) = v_table(:,cmt_myopic(vv),vv);
-%     u_myopic(:,vv) = u_table(:,cmt_myopic(vv),vv);
-% end
-% toc;
-% % save('MyopicDispatch', 'v_range', 'cmt_myopic', 'f_sum_myopic', 'f_myopic', 'v_myopic', 'u_myopic');
-% 
-% % ====================
-% figure(1); clf; hold on; box on; % Fuel consumption
-% plot(0,0,'x');
-% plot(v_range, f_table_sum, 'linewidth', 1);
-% for n = 1:coal_num
-%     not_nan = ~isnan(f_table_sum(n,:));
-%     id_st = find(not_nan==1, 1, 'first');
-%     id_ed = find(not_nan==1, 1, 'last');
-%     v_st = v_range(id_st);
-%     v_ed = v_range(id_ed);
-%     if n==1
-%         text(v_ed, max(f_table_sum(n,:)), [' ', num2str(n), ' Unit is commited'], 'fontsize', 7);
-%     elseif n<11
-%         text(v_ed, max(f_table_sum(n,:)), [' ', num2str(n), ' Units are commited'], 'fontsize', 7);
-%     else
-%         text(v_st, min(f_table_sum(n,:)), [' ', num2str(n), ' Units are commited '], 'fontsize', 7, 'horizontalalignment', 'right');
-%     end
-% end
-% xlabel('Output Power, MW (in-house use excluded)');
-% ylabel('Coal Consumption (ton/h)');
-% my_gridline;
-% h1 = plot(v_range, f_sum_myopic, 'color', [1 1 1]*0, 'linewidth', 0.35);
-% legend(h1, 'Myopic Dispatch');
-% set(legend, 'location', 'northwest');
-% 
-% % ====================
-% figure(2); clf; % Unit commitment
-% plot(v_range, cmt_myopic);
-% ylim([0 15]);
-% set(gca, 'ytick', 0:3:15);
-% xlabel('Output Power, MW (in-house use excluded)');
-% ylabel('Number of Plants Dispatched (Count)');
-% my_gridline;
+cmt_myopic = zeros(1,length(v_range));
+f_sum_myopic = zeros(1,length(v_range));
+f_myopic = zeros(coal_num,length(v_range));
+v_myopic = zeros(coal_num,length(v_range));
+u_myopic = zeros(coal_num,length(v_range));
+tic;
+for vv = 1:length(v_range)
+    f_sum_column = f_table_sum(:,vv);
+    [f_sum_myopic(vv), cmt_myopic(vv)] = min(f_sum_column);
+    f_myopic(:,vv) = f_table(:,cmt_myopic(vv),vv);
+    v_myopic(:,vv) = v_table(:,cmt_myopic(vv),vv);
+    u_myopic(:,vv) = u_table(:,cmt_myopic(vv),vv);
+end
+toc;
+% save('MyopicDispatch', 'v_range', 'cmt_myopic', 'f_sum_myopic', 'f_myopic', 'v_myopic', 'u_myopic');
+
+% ====================
+figure(1); clf; hold on; box on; % Fuel consumption
+plot(0,0,'x');
+plot(v_range, f_table_sum, 'linewidth', 1);
+for n = 1:coal_num
+    not_nan = ~isnan(f_table_sum(n,:));
+    id_st = find(not_nan==1, 1, 'first');
+    id_ed = find(not_nan==1, 1, 'last');
+    v_st = v_range(id_st);
+    v_ed = v_range(id_ed);
+    if n==1
+        text(v_ed, max(f_table_sum(n,:)), [' ', num2str(n), ' Unit is commited'], 'fontsize', 7);
+    elseif n<11
+        text(v_ed, max(f_table_sum(n,:)), [' ', num2str(n), ' Units are commited'], 'fontsize', 7);
+    else
+        text(v_st, min(f_table_sum(n,:)), [' ', num2str(n), ' Units are commited '], 'fontsize', 7, 'horizontalalignment', 'right');
+    end
+end
+xlabel('Output, MWh (excludedin-house use)');
+ylabel('Coal Consumption (ton)');
+my_gridline;
+h1 = plot(v_range, f_sum_myopic, 'color', [1 1 1]*0, 'linewidth', 0.35);
+legend(h1, 'Myopic Dispatch');
+set(legend, 'location', 'northwest');
+
+% ====================
+figure(2); clf; % Unit commitment
+plot(v_range, cmt_myopic);
+ylim([0 15]);
+set(gca, 'ytick', 0:3:15);
+xlabel('Output Power, MW (in-house use excluded)');
+ylabel('Number of Plants Dispatched (Count)');
+my_gridline;
 
 load  MyopicDispatch; % 'v_range', 'cmt_myopic', 'f_sum_myopic', 'f_myopic', 'v_myopic', 'u_myopic'
 
