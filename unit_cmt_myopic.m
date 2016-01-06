@@ -225,7 +225,7 @@ set(gca, 'xtick', 0:168:24*7*4);
 set(gca, 'ytick', 0:1500:9000);
 set(gca, 'layer', 'top');
 ylabel('Total Output Power (MW)');
-title('Myopic Dispatch', 'fontsize', 16);
+title('Myopic Dispatch (Time Window: 4 Weeks)', 'fontsize', 16);
 % legend('Coal', 'Wind', 'Wind Curtailment');
 % set(legend, 'location', 'northwest');
 

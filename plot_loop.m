@@ -86,16 +86,17 @@ alpha(0.5);
 text(wind_pwr_range(end), target_pwr_range(end), myopic.table_cost_total(end,end)'/1e9, '\leftarrowMyopic');
 text(wind_pwr_range(end), target_pwr_range(end), dp.table_cost_total(end,end)'/1e9, '\leftarrowDP');
 
+% ====================
 % Cost improvement
 dc = (dp.table_cost_total)./(myopic.table_cost_total);
-figure(31); clf;
-surf(wind_pwr_range, target_pwr_range, dc');
-xlabel('Wind Capacity (MW)');
-ylabel('Target Output (MW)');
-zlabel('Cost Difference (-)');
-title ('Myopic vs. Horizon-Based (DP) Dispatch');
-ylim([2000 10000]);
-view(40, 25);
+% figure(31); clf;
+% surf(wind_pwr_range, target_pwr_range, dc');
+% xlabel('Wind Capacity (MW)');
+% ylabel('Target Output (MW)');
+% zlabel('Cost Difference (-)');
+% title ('Myopic vs. Horizon-Based (DP) Dispatch');
+% ylim([2000 10000]);
+% view(40, 25);
 
 figure(32); clf;
 [C,h] = contourf(wind_pwr_range, target_pwr_range, dc');
@@ -105,4 +106,61 @@ ylabel('Target Output (MW)');
 zlabel('Cost Difference (-)');
 title ('Myopic vs. Horizon-Based (DP) Dispatch');
 grid on;
+set(gca, 'ytick', 2500:1000:8500);
+set(gca, 'xtick', 0:1000:5000);
+
+% ====================
+% Cost makeups
+pctg_fuel1 = dp.table_cost_fuel./dp.table_cost_total;
+pctg_base_vom1 = dp.table_cost_base_vom./dp.table_cost_total;
+pctg_startup1 = dp.table_cost_startup./dp.table_cost_total;
+pctg_ramp1 = dp.table_cost_ramp./dp.table_cost_total;
+
+pctg_fuel2 = myopic.table_cost_fuel./myopic.table_cost_total;
+pctg_base_vom2 = myopic.table_cost_base_vom./myopic.table_cost_total;
+pctg_startup2 = myopic.table_cost_startup./myopic.table_cost_total;
+pctg_ramp2 = myopic.table_cost_ramp./myopic.table_cost_total;
+
+id_r_c = [1,1
+          1,13
+          11,13
+          11,1];
+id = sub2ind(size(pctg_fuel1), id_r_c(:,1), id_r_c(:,2));
+
+dp_bar = [pctg_fuel1(id), pctg_base_vom1(id), pctg_startup1(id), pctg_ramp1(id)];
+myopic_bar = [pctg_fuel2(id), pctg_base_vom2(id), pctg_startup2(id), pctg_ramp2(id)];
+
+%%
+figure(4); clf;
+data = [dp_bar(1,:); myopic_bar(1,:)];
+bar(1:2, data, 'stacked');
+colormap summer
+title('2500MW wind; Target Output@2500MW');
+goldenratio;
+set(gca, 'xtick', 1:2, 'xticklabel', {'Myopic', 'DP'});
+
+figure(41); clf;
+data = [dp_bar(2,:); myopic_bar(2,:)];
+bar(1:2, data, 'stacked');
+colormap summer
+title('2500MW wind; Target Output@8500MW');
+goldenratio;
+set(gca, 'xtick', 1:2, 'xticklabel', {'Myopic', 'DP'});
+
+figure(42); clf;
+data = [dp_bar(3,:); myopic_bar(3,:)];
+bar(1:2, data, 'stacked');
+colormap summer
+title('5000MW wind; Target Output@2500MW');
+goldenratio;
+set(gca, 'xtick', 1:2, 'xticklabel', {'Myopic', 'DP'});
+
+figure(43); clf;
+data = [dp_bar(4,:); myopic_bar(4,:)];
+bar(1:2, data, 'stacked');
+colormap summer
+title('5000MW wind; Target Output@8500MW');
+goldenratio;
+set(gca, 'xtick', 1:2, 'xticklabel', {'Myopic', 'DP'});
+
 

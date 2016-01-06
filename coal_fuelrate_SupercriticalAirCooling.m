@@ -53,25 +53,24 @@ plot([coal_fuel_x(1),coal_fuel_x(end)],[coal_fuel_y(1),coal_fuel_y(end)], '--', 
 ylim([98 202]);
 xlim([-15 710]);
 
-xa = 507/(266*2)*660; % min fuel rate @ 0.953 (i.e. 419MW)
-ya = interp1(coal_fuel_x, coal_fuel_y, xa);
-plot(xa, ya, 'ko', 'markerf', 'k', 'markersize', 3);
-text(xa+0.02, ya+7, 'Min. Fuel Rate      ', 'horizontalalignment', 'right');
-text(xa+0.02, ya+2, ['@ ', num2str(xa, '%3.0f'), ' ( (y/x)^{\prime}=0 ) '], 'horizontalalignment', 'right');
+% xa = 507/(266*2)*660; % min fuel rate @ 0.953 (i.e. 419MW)
+% ya = interp1(coal_fuel_x, coal_fuel_y, xa);
+% plot(xa, ya, 'ko', 'markerf', 'k', 'markersize', 3);
+% text(xa+0.02, ya+7, 'Min. Fuel Rate      ', 'horizontalalignment', 'right');
+% text(xa+0.02, ya+2, ['@ ', num2str(xa, '%3.0f'), ' ( (y/x)^{\prime}=0 ) '], 'horizontalalignment', 'right');
 
-xb = 507*2/(266*3*2)*660; % inflection point @ 0.6353 (i.e. 629MW)
-yb = interp1(coal_fuel_x, coal_fuel_y, xb);
-plot(xb, yb, 'ko', 'markerf', 'k', 'markersize', 3);
-text(xb+0.02, yb-4, 'Inflection Point');
-text(xb+0.02, yb-8, ['@ ', num2str(xb, '%3.0f'), ' ( y^{\prime\prime}=0 )']);
+% xb = 507*2/(266*3*2)*660; % inflection point @ 0.6353 (i.e. 629MW)
+% yb = interp1(coal_fuel_x, coal_fuel_y, xb);
+% plot(xb, yb, 'ko', 'markerf', 'k', 'markersize', 3);
+% text(xb+0.02, yb-4, 'Inflection Point');
+% text(xb+0.02, yb-8, ['@ ', num2str(xb, '%3.0f'), ' ( y^{\prime\prime}=0 )']);
 
 text(0.4*coal_nameplate, mean(get(gca, 'ylim')), '40% of Nameplate Capacity     ', 'rotation', 90, 'horizontalalignment', 'center', 'color', [0.5 0.5 0.5], 'fontsize', 9);
 text(1.0*coal_nameplate, mean(get(gca, 'ylim')), '100% of Nameplate Capacity     ', 'rotation', 90, 'horizontalalignment', 'center', 'color', [0.5 0.5 0.5], 'fontsize', 9);
 
-my_gridline([1 1 1]*0.85, 'front');
 set(gca, 'fontsize', 9);
-xlabel('Generation (MW)');
-ylabel('Coal Consumption (ton/h)', 'fontweight', 'bold', 'fontsize', 12);
+xlabel('Generation (MWh)');
+ylabel('Hourly Coal Consumption (ton)', 'fontweight', 'bold', 'fontsize', 12);
 set(gcf, 'unit', 'inch', 'pos', [1.0    1.09    5.0000    3.7500]);
 set(gca, 'pos', [0.1300    0.115    0.7750    0.77]);
 
@@ -79,6 +78,9 @@ ax_pos = get(gca, 'pos');
 x_lim = get(gca, 'xlim');
 y_lim = get(gca, 'ylim');
 y_tick = get(gca, 'ytick');
+
+legend('Working Range', 'Fuel Consumption');
+set(legend, 'pos', [0.49    0.75    0.2890    0.0950]);
 
 ax2 = axes;
 set(ax2, 'pos', ax_pos);
@@ -89,4 +91,5 @@ set(ax2, 'xaxislocation', 'top', 'xlim', x_lim, 'xtick', x_ticklabel*coal_namepl
 set(ax2, 'yaxislocation', 'right', 'ylim', y_lim, 'ytick', y_tick, 'yticklabel', []);
 xlabel('Output Power (Normalized)', 'fontsize', 9);
 
+% export_fig tmp -painters;
 

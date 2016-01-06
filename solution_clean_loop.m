@@ -54,7 +54,7 @@ text(v_coal_unit(end), f_coal_unit(end), ' 1 Unit is commited', 'fontsize', 7);
 % ====================
 % Multiple units
 tic;
-for n = 2:coal_num
+for n = 3%2:coal_num
     v_long = v_coal_unit*n;
 
     u = ones(n,dx) * u_min;
@@ -128,10 +128,10 @@ xlabel('Output Power, MW (in-house use excluded)');
 ylabel('Coal Consumption (ton/h)');
 my_gridline;
 
-save('FourteenUnits', ...
-     'v_range', ...
-     'f_table', 'u_table', 'v_table', ...
-     'f_table_sum');
+% save('FourteenUnits', ...
+%      'v_range', ...
+%      'f_table', 'u_table', 'v_table', ...
+%      'f_table_sum');
 
 % % ====================
 % figure(1); clf;

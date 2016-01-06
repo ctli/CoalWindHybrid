@@ -313,10 +313,11 @@ set(gca, 'xtick', 0:168:8760);
 set(gca, 'ytick', 0:1500:9000);
 set(gca, 'layer', 'top');
 ylabel('Total Output Power (MW)');
-title('Horizon-Based Dispatch', 'fontsize', 16);
+title('Horizon-Based Dispatch by DP (Time Window: 4 Weeks)   ', 'fontsize', 16);
 % ylim([8000 9000]);
 % set(gca, 'ytick', 8000:200:9000);
 legend(ha, 'Coal Dispatch', 'Wind Dispatch', 'Wind Curtailment');
+set(legend, 'location', 'southwest');
 
 % ====================
 ax2 = subplot(4,1,3); hold on; box on;

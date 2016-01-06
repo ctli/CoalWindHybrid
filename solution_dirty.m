@@ -165,15 +165,15 @@ opt_f2 = interp1(u_coal_unit2, f_coal_unit2, opt_u2);
 ha = area(v_unique, [opt_f1; opt_f2]');
 set(ha(1), 'facec', [0.8 0.95 1], 'edgecolor', 'none');
 set(ha(2), 'facec', [1 0.8 0.8], 'edgecolor', 'none');
-xlabel('Power Output, MW (exclude in-house generation)')
-ylabel('Coal Consumption (ton/h)');
+xlabel('Output, MWh (exclude in-house generation)')
+ylabel('Hourly Coal Consumption (ton)');
 xlim([400 1250]);
 legend(ha, 'u1', 'u2');
 set(legend, 'location', 'northwest');
 
 
 %% ========================================================================
-plot_switch = 'on'; % on/off
+plot_switch = 'off'; % on/off
 switch plot_switch
     case 'on' % don't plot
 dx1 = 10; % very course grid for plotting
@@ -191,9 +191,9 @@ f_coal = f1 + f2;
 figure(4); clf;
 mesh(u_coal_unit1, u_coal_unit2, u); hold on;
 plot3(opt_u1, opt_u2, u_unique, 'o-', 'linewidth', 1, 'markersize', 4);
-xlabel('u1 (MW)');
-ylabel('u2 (MW)');
-zlabel('Combined Power Output (MW)');
+xlabel('u1 (MWh)');
+ylabel('u2 (MWh)');
+zlabel('Combined Power Output (MWh)');
 view(315, 35);
 set(gcf, 'unit', 'inch', 'pos', [1.0    5.85    5.0000    3.7500]);
 
@@ -215,9 +215,9 @@ mesh(u_coal_unit1, u_coal_unit2, f_coal); hold on;
 surface([0.4 1]*coal_nameplate, [0.4 1]*coal_nameplate, ones(2,2)*299.4, 'facec', [1 0.5 0.5], 'edgecolor', 'none');
 plot3([0.44 1]*coal_nameplate, [1 0.44]*coal_nameplate, ones(1,2)*299.4, 'color', 'k')
 alpha(0.7);
-xlabel('u1 (MW)');
-ylabel('u2 (MW)');
-zlabel('Combined Fuel Consumption (ton/h)');
+xlabel('u1 (MWh)');
+ylabel('u2 (MWh)');
+zlabel('Combined Fuel Consumption (ton)');
 % view(315, 45);
 view(-110, 25);
 set(gcf, 'unit', 'inch', 'pos', [6.2    5.85    5.0000    3.7500]);
@@ -240,16 +240,16 @@ figure(52); clf;
 mesh(u_coal_unit1, u_coal_unit2, f_coal); hold on;
 plot3(opt_u1, opt_u2, opt_f, 'o-', 'linewidth', 1, 'markersize', 4);
 alpha(0.8);
-xlabel('u1 (MW)');
-ylabel('u2 (MW)');
-zlabel('Combined Fuel Consumption (ton/h)');
+xlabel('u1 (MWh)');
+ylabel('u2 (MWh)');
+zlabel('Combined Fuel Consumption (ton)');
 view(315, 15);
 set(gcf, 'unit', 'inch', 'pos', [11.4    5.85    5.0000    3.7500]);
 
 % ==============================
 figure(6); clf; hold on; box on;
-plot([200 800], [200 800], '-', 'color', [0.7 0.7 0.7]);
-plot(opt_u1, opt_u2, 'o-', 'markersize', 3);
+plot([200 800], [200 800], '--', 'color', [1 1 1]*0.8);
+plot(opt_u1, opt_u2, 'o-', 'markersize', 3, 'color', [0 0.5647 0.7412]);
 xlabel('Optimal u1');
 ylabel('Optimal u2');
 set(gcf, 'unit', 'inch', 'pos', [11.4    1.0900    5.0000    3.7500]);
